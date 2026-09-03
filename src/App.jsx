@@ -3,6 +3,7 @@ import { getCalculator, getBySystem } from './registry.js';
 import Home, { CalcList } from './components/Home.jsx';
 import CalculatorView from './components/CalculatorView.jsx';
 import Disclaimer from './components/Disclaimer.jsx';
+import InstallHint from './components/InstallHint.jsx';
 
 // Простейший роутер на hash: #/  #/system/<раздел>  #/calc/<id>
 function parseHash(hash) {
@@ -50,6 +51,8 @@ export default function App() {
         )}
 
         {route.name === 'calc' && <CalcRoute id={route.id} onBack={() => go('#/')} />}
+
+        <InstallHint />
       </div>
     </Disclaimer>
   );

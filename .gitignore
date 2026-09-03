@@ -5,3 +5,4 @@ dist-ssr
 .DS_Store
 .vite
 dev-server.log
+dev-dist

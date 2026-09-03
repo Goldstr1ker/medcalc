@@ -558,3 +558,47 @@ h2 {
   font-weight: 600;
   font-size: 15px;
 }
+
+/* ---------- Подсказка установки ---------- */
+
+.install-hint {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  max-width: calc(var(--maxw) - 8px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 40px 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.18);
+  font-size: 13px;
+  z-index: 50;
+}
+
+.install-hint__btn {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.install-hint__close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px;
+}
