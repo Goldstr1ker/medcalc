@@ -19,6 +19,18 @@ npm run build      # -> dist/, статические файлы, деплой �
 npm run preview    # локальный просмотр сборки
 ```
 
+## Деплой
+
+Автоматический на GitHub Pages: пуш в `main` запускает
+`.github/workflows/deploy.yml` (сборка + публикация).
+Живой адрес: https://goldstr1ker.github.io/medcalc/
+
+Один раз включить в репозитории: **Settings → Pages → Build and deployment →
+Source: GitHub Actions**.
+
+Роутинг — по hash (`#/calc/<id>`), `base: './'` в `vite.config.js`, поэтому
+подпапка `/medcalc/` работает без доп. настройки и SPA-fallback не нужен.
+
 ## Как добавить калькулятор
 
 Создать файл `src/calculators/<раздел>/<id>.js` с `export default` объектом.
