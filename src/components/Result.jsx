@@ -20,6 +20,25 @@ function BandCaption({ band }) {
   );
 }
 
+// Дополнительные вычисленные значения (напр. скорость инфузии, альтернативная формула).
+// В отличие от breakdown (баллы шкалы, со знаком «+»), это просто пары «подпись: значение».
+function Details({ items }) {
+  if (!items?.length) return null;
+  return (
+    <ul className="details">
+      {items.map((d, i) => (
+        <li key={i}>
+          <span>{d.label}</span>
+          <b>
+            {fmtNumber(d.value, d.decimals ?? 0)}
+            {d.unit ? ` ${d.unit}` : ''}
+          </b>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function Gauge({ spec, result, band }) {
   const { min, max } = spec;
   const ranges = bandRanges(spec.bands, min, max);
@@ -58,6 +77,8 @@ function Gauge({ spec, result, band }) {
           ))}
         </div>
       </div>
+
+      <Details items={result.details} />
     </div>
   );
 }
@@ -106,6 +127,7 @@ function PlainValue({ result, band }) {
         {result.unit ? <span className="result__unit"> {result.unit}</span> : null}
       </div>
       <BandCaption band={band} />
+      <Details items={result.details} />
     </div>
   );
 }
