@@ -3,36 +3,21 @@
 const ASCITES = ['Нет', 'Лёгкий/умеренный (поддаётся диуретикам)', 'Напряжённый (рефрактерный)'];
 const ENCEPHALOPATHY = ['Нет', 'I–II степень', 'III–IV степень'];
 
+import { SYSTEMS } from '../../lib/systems.js';
+import { ALBUMIN_GL, BILIRUBIN_UMOL } from '../../lib/units.js';
+
 export default {
   id: 'child-pugh',
   name: 'Класс тяжести цирроза по Чайлд-Пью',
   shortName: 'Чайлд-Пью',
-  system: 'Гастроэнтерология',
+  system: SYSTEMS.GASTROENTEROLOGY,
   tags: ['цирроз', 'печень', 'чайлд', 'пью', 'child-pugh', 'печёночная недостаточность'],
   description:
     'Оценка тяжести цирроза печени и краткосрочного прогноза по пяти клинико-лабораторным параметрам.',
 
   inputs: [
-    {
-      id: 'bilirubin',
-      label: 'Общий билирубин',
-      type: 'number',
-      min: 0,
-      units: [
-        { id: 'umol', label: 'мкмоль/л', factor: 1 },
-        { id: 'mgdl', label: 'мг/дл', factor: 17.1 },
-      ],
-    },
-    {
-      id: 'albumin',
-      label: 'Альбумин сыворотки',
-      type: 'number',
-      min: 0,
-      units: [
-        { id: 'gl', label: 'г/л', factor: 1 },
-        { id: 'gdl', label: 'г/дл', factor: 10 },
-      ],
-    },
+    { id: 'bilirubin', label: 'Общий билирубин', type: 'number', min: 0, units: BILIRUBIN_UMOL },
+    { id: 'albumin', label: 'Альбумин сыворотки', type: 'number', min: 0, units: ALBUMIN_GL },
     { id: 'inr', label: 'МНО', type: 'number', min: 0.5, max: 10 },
     { id: 'ascites', label: 'Асцит', type: 'select', options: ASCITES },
     { id: 'encephalopathy', label: 'Печёночная энцефалопатия', type: 'select', options: ENCEPHALOPATHY },
@@ -104,6 +89,35 @@ export default {
     'Оценка асцита и энцефалопатии субъективна — межисследовательская вариабельность выше, чем у лабораторных параметров.',
     'Для приоритизации в листе ожидания трансплантации печени точнее MELD-Na (учитывает функцию почек) — см. отдельный калькулятор.',
     'Исторически создан для прогноза при хирургии по поводу портальной гипертензии, но широко используется как общий индекс тяжести цирроза.',
+  ],
+
+  examples: [
+    {
+      note: 'Все параметры в норме — минимально возможные 5 баллов, класс A',
+      inputs: { bilirubin: 20, albumin: 40, inr: 1.2 },
+      expect: { value: 5, band: 'A' },
+    },
+    {
+      note: 'Средние значения по всем пяти параметрам (по 2 балла) + асцит — класс B',
+      inputs: {
+        bilirubin: 40,
+        albumin: 30,
+        inr: 1.8,
+        ascites: 'Лёгкий/умеренный (поддаётся диуретикам)',
+      },
+      expect: { value: 9, band: 'B' },
+    },
+    {
+      note: 'Всё по 3 балла — максимум 15, класс C',
+      inputs: {
+        bilirubin: 60,
+        albumin: 25,
+        inr: 2.5,
+        ascites: 'Напряжённый (рефрактерный)',
+        encephalopathy: 'III–IV степень',
+      },
+      expect: { value: 15, band: 'C' },
+    },
   ],
 
   references: [

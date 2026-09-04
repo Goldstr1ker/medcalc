@@ -1,11 +1,14 @@
 // Кальций сыворотки, скорректированный по альбумину (формула Пейна, в единицах СИ).
 //Ca(корр., ммоль/л) = Ca(общий, ммоль/л) + 0,02 × (40 − альбумин(г/л))
 
+import { SYSTEMS } from '../../lib/systems.js';
+import { ALBUMIN_GL } from '../../lib/units.js';
+
 export default {
   id: 'corrected-calcium',
   name: 'Скорректированный кальций (по альбумину)',
   shortName: 'Са скорр.',
-  system: 'Нефрология',
+  system: SYSTEMS.NEPHROLOGY,
   tags: ['кальций', 'альбумин', 'гипокальциемия', 'гиперкальциемия', 'электролиты'],
   description:
     'Поправка общего кальция сыворотки на уровень альбумина — низкий альбумин занижает измеренный общий кальций, не отражая истинный статус.',
@@ -18,16 +21,7 @@ export default {
       unit: 'ммоль/л',
       min: 0,
     },
-    {
-      id: 'albumin',
-      label: 'Альбумин сыворотки',
-      type: 'number',
-      min: 0,
-      units: [
-        { id: 'gl', label: 'г/л', factor: 1 },
-        { id: 'gdl', label: 'г/дл', factor: 10 },
-      ],
-    },
+    { id: 'albumin', label: 'Альбумин сыворотки', type: 'number', min: 0, units: ALBUMIN_GL },
   ],
 
   calculate({ calcium, albumin }) {
@@ -96,6 +90,30 @@ export default {
   caveats: [
     'Формула — приближение; при доступности предпочтительнее измерять ионизированный кальций напрямую, особенно у тяжёлых и реанимационных пациентов.',
     'Точность коррекции снижается при выраженном ацидозе/алкалозе и на крайних значениях альбумина.',
+  ],
+
+  examples: [
+    {
+      note: 'Ca 2,0 при альбумине 20 г/л — «псевдогипокальциемия», на деле норма',
+      inputs: { calcium: 2.0, albumin: 20 },
+      expect: { value: 2.4, band: 'normal' },
+    },
+    {
+      note: 'Ca 2,1 при нормальном альбумине 40 г/л — истинная гипокальциемия',
+      inputs: { calcium: 2.1, albumin: 40 },
+      expect: { value: 2.1, band: 'low' },
+    },
+    {
+      note: 'Ca 2,9 при альбумине 35 г/л — выраженная гиперкальциемия',
+      inputs: { calcium: 2.9, albumin: 35 },
+      expect: { value: 3.0, band: 'severe_high' },
+    },
+    {
+      note: 'Альбумин в г/дл даёт тот же результат',
+      inputs: { calcium: 2.0, albumin: 2.0 },
+      units: { albumin: 'gdl' },
+      expect: { value: 2.4, band: 'normal' },
+    },
   ],
 
   references: [

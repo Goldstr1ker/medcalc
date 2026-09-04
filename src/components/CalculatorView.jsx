@@ -1,66 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
-import { resolveBand } from '../lib/bands.js';
+import { compute, initialUnits, initialValues, isReady } from '../lib/compute.js';
 import { isFavorite, toggleFavorite, pushRecent } from '../lib/storage.js';
 import Result from './Result.jsx';
 
-// Значение поля по умолчанию.
-function initialValue(input) {
-  if (input.type === 'select') return input.options[0];
-  if (input.type === 'boolean') return false;
-  return '';
-}
-
-// Приводит введённые значения к каноническому виду (переводит единицы) для calculate().
-function toCanonical(inputs, values, units) {
-  const out = {};
-  for (const input of inputs) {
-    let v = values[input.id];
-    if (input.type === 'number') {
-      v = v === '' ? null : Number(v);
-      if (v != null && input.units) {
-        const u = input.units.find((x) => x.id === units[input.id]);
-        v = v * (u?.factor ?? 1);
-      }
-    }
-    out[input.id] = v;
-  }
-  return out;
-}
-
 export default function CalculatorView({ calc, onBack }) {
-  const [values, setValues] = useState(() =>
-    Object.fromEntries(calc.inputs.map((i) => [i.id, initialValue(i)])),
-  );
-  const [units, setUnits] = useState(() =>
-    Object.fromEntries(calc.inputs.filter((i) => i.units).map((i) => [i.id, i.units[0].id])),
-  );
+  const [values, setValues] = useState(() => initialValues(calc.inputs));
+  const [units, setUnits] = useState(() => initialUnits(calc.inputs));
   const [fav, setFav] = useState(() => isFavorite(calc.id));
 
   // Сброс состояния при переходе на другой калькулятор.
   useEffect(() => {
-    setValues(Object.fromEntries(calc.inputs.map((i) => [i.id, initialValue(i)])));
-    setUnits(Object.fromEntries(calc.inputs.filter((i) => i.units).map((i) => [i.id, i.units[0].id])));
+    setValues(initialValues(calc.inputs));
+    setUnits(initialUnits(calc.inputs));
     setFav(isFavorite(calc.id));
     pushRecent(calc.id);
   }, [calc]);
 
-  const ready = calc.inputs.every((i) => {
-    if (i.type !== 'number' || i.optional) return true;
-    const v = values[i.id];
-    return v !== '' && !Number.isNaN(Number(v));
-  });
+  const ready = isReady(calc.inputs, values);
 
-  const result = useMemo(() => {
-    if (!ready) return null;
-    try {
-      return calc.calculate(toCanonical(calc.inputs, values, units));
-    } catch (e) {
-      return { error: String(e?.message || e) };
-    }
+  const { result, band } = useMemo(() => {
+    if (!ready) return { result: null, band: null };
+    return compute(calc, values, units);
   }, [calc, values, units, ready]);
-
-  const band =
-    result && !result.error ? resolveBand(result.value, calc.result.bands) : null;
 
   const interpretation = band ? calc.interpretation?.[band.id] : null;
   const guidance = band ? calc.guidance?.[band.id] : null;
@@ -101,7 +62,11 @@ export default function CalculatorView({ calc, onBack }) {
         ))}
       </section>
 
-      {result && band ? (
+      {!ready ? (
+        <div className="result result--empty">Заполните поля для расчёта</div>
+      ) : result?.error || !band ? (
+        <Result spec={calc.result} result={result ?? { error: 'неизвестная ошибка' }} band={band} />
+      ) : (
         <>
           <Result spec={calc.result} result={result} band={band} />
 
@@ -119,8 +84,6 @@ export default function CalculatorView({ calc, onBack }) {
             </section>
           ) : null}
         </>
-      ) : (
-        <div className="result result--empty">Заполните поля для расчёта</div>
       )}
 
       {calc.caveats?.length ? (

@@ -5,36 +5,21 @@
 // (билирубин, МНО, креатинин — не менее 1; креатинин — не более 4, =4 при диализе)
 // При MELD > 11: MELD-Na = MELD + 1,32×(137−Na) − [0,033×MELD×(137−Na)], Na в диапазоне 125–137.
 
+import { SYSTEMS } from '../../lib/systems.js';
+import { BILIRUBIN_MGDL, CREATININE_MGDL } from '../../lib/units.js';
+
 export default {
   id: 'meld-na',
   name: 'MELD-Na',
   shortName: 'MELD-Na',
-  system: 'Гастроэнтерология',
+  system: SYSTEMS.GASTROENTEROLOGY,
   tags: ['meld', 'meld-na', 'цирроз', 'печень', 'трансплантация печени', 'лист ожидания'],
   description:
     'Индекс тяжести терминального заболевания печени с поправкой на натрий — используется для приоритизации в листе ожидания трансплантации.',
 
   inputs: [
-    {
-      id: 'bilirubin',
-      label: 'Общий билирубин',
-      type: 'number',
-      min: 0,
-      units: [
-        { id: 'umol', label: 'мкмоль/л', factor: 1 / 17.1 },
-        { id: 'mgdl', label: 'мг/дл', factor: 1 },
-      ],
-    },
-    {
-      id: 'creatinine',
-      label: 'Креатинин сыворотки',
-      type: 'number',
-      min: 0,
-      units: [
-        { id: 'umol', label: 'мкмоль/л', factor: 1 / 88.4 },
-        { id: 'mgdl', label: 'мг/дл', factor: 1 },
-      ],
-    },
+    { id: 'bilirubin', label: 'Общий билирубин', type: 'number', min: 0, units: BILIRUBIN_MGDL },
+    { id: 'creatinine', label: 'Креатинин сыворотки', type: 'number', min: 0, units: CREATININE_MGDL },
     { id: 'inr', label: 'МНО', type: 'number', min: 0.5, max: 10 },
     { id: 'sodium', label: 'Натрий сыворотки', type: 'number', unit: 'ммоль/л', min: 100, max: 160 },
     { id: 'dialysis', label: 'Гемодиализ ≥ 2 раз за последнюю неделю (или ЗПТ ≥ 24 ч)', type: 'boolean' },
@@ -114,6 +99,29 @@ export default {
     'Не подходит для детей до 12 лет (используется PELD).',
     'При отдельных состояниях (гепатоцеллюлярная карцинома, гепатопульмональный синдром и др.) в реальных листах ожидания применяются exception-баллы, не отражённые в этой формуле.',
     'Указанные проценты летальности — приближённые ориентиры по историческим когортам, не индивидуальный прогноз конкретного пациента.',
+  ],
+
+  examples: [
+    {
+      note: 'Билирубин 34, креатинин 88,4, МНО 1,5, Na 135 — MELD 14, с поправкой 16',
+      inputs: { bilirubin: 34, creatinine: 88.4, inr: 1.5, sodium: 135 },
+      expect: { value: 16, band: 'b2', details: [14] },
+    },
+    {
+      note: 'Все показатели ниже 1 округляются до 1 — минимально возможный MELD 6, поправка не применяется (MELD ≤ 11)',
+      inputs: { bilirubin: 10, creatinine: 60, inr: 1.0, sodium: 140 },
+      expect: { value: 6, band: 'b1', details: [6] },
+    },
+    {
+      note: 'На диализе креатинин принудительно = 4 мг/дл; выраженная гипонатриемия',
+      inputs: { bilirubin: 100, creatinine: 200, inr: 2.0, sodium: 128, dialysis: true },
+      expect: { value: 36, band: 'b4', details: [34] },
+    },
+    {
+      note: 'Натрий 110 обрезается до 125: даёт 36, а не 39, как было бы без ограничения',
+      inputs: { bilirubin: 100, creatinine: 200, inr: 2.0, sodium: 110, dialysis: true },
+      expect: { value: 36, details: [34] },
+    },
   ],
 
   references: [

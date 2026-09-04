@@ -6,6 +6,10 @@ export default function Result({ spec, result, band }) {
   if (result?.error) {
     return <div className="result result--error">Не удалось рассчитать: {result.error}</div>;
   }
+  if (!band) {
+    // Значение не попало ни в один диапазон — ошибка в схеме калькулятора.
+    return <div className="result result--error">Результат вне заданных диапазонов</div>;
+  }
   if (spec.type === 'gauge') return <Gauge spec={spec} result={result} band={band} />;
   if (spec.type === 'score') return <Score spec={spec} result={result} band={band} />;
   return <PlainValue result={result} band={band} />;

@@ -1,11 +1,13 @@
 // qSOFA (quick SOFA) — прикроватный маркёр риска неблагоприятного исхода
 // у пациента с подозрением на инфекцию. По 1 баллу за каждый признак.
 
+import { SYSTEMS } from '../../lib/systems.js';
+
 export default {
   id: 'qsofa',
   name: 'qSOFA',
   shortName: 'qSOFA',
-  system: 'Реаниматология',
+  system: SYSTEMS.CRITICAL_CARE,
   tags: ['сепсис', 'sepsis-3', 'sofa', 'инфекция', 'орит', 'септический шок', 'скрининг'],
   description:
     'Быстрая прикроватная оценка риска госпитальной летальности и длительного пребывания в ОРИТ у пациента с подозрением на инфекцию.',
@@ -69,6 +71,29 @@ export default {
   caveats: [
     'qSOFA — инструмент настороженности, а не диагноз сепсиса и не основание для старта терапии сам по себе.',
     'Диагноз сепсиса по Sepsis-3 = подозрение на инфекцию + прирост SOFA ≥ 2 баллов.',
+  ],
+
+  examples: [
+    {
+      note: 'Признаков нет — 0 баллов',
+      inputs: {},
+      expect: { value: 0, band: 'low' },
+    },
+    {
+      note: 'Только тахипноэ — 1 балл, порог ещё не достигнут',
+      inputs: { rr: true },
+      expect: { value: 1, band: 'low' },
+    },
+    {
+      note: 'Тахипноэ + гипотензия — 2 балла, порог настороженности',
+      inputs: { rr: true, sbp: true },
+      expect: { value: 2, band: 'high' },
+    },
+    {
+      note: 'Все три признака — максимум',
+      inputs: { rr: true, ams: true, sbp: true },
+      expect: { value: 3, band: 'high' },
+    },
   ],
 
   references: [

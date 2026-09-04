@@ -6,8 +6,12 @@
   "description": "Клинические калькуляторы и шкалы с разбором по клиническим рекомендациям. Офлайн, на русском.",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npm run check",
     "build": "vite build",
-    "preview": "vite preview --port 4173 --strictPort"
+    "preview": "vite preview --port 4173 --strictPort",
+    "validate": "node scripts/validate-calculators.mjs",
+    "test": "node --test",
+    "check": "npm run validate && npm test"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -4,6 +4,8 @@
 // import.meta.glob подхватывает их автоматически — чтобы добавить калькулятор,
 // достаточно создать новый файл, править этот реестр не нужно.
 
+import { systemOrderIndex } from './lib/systems.js';
+
 const modules = import.meta.glob('./calculators/**/*.js', { eager: true });
 
 export const calculators = Object.values(modules)
@@ -12,8 +14,10 @@ export const calculators = Object.values(modules)
   .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
 // Разделы (системы органов) с числом калькуляторов в каждом.
+// Порядок — клинический, из lib/systems.js, а не алфавитный.
+// Разделы без калькуляторов сюда не попадают.
 export const systems = [...new Set(calculators.map((c) => c.system))]
-  .sort((a, b) => a.localeCompare(b, 'ru'))
+  .sort((a, b) => systemOrderIndex(a) - systemOrderIndex(b))
   .map((name) => ({
     name,
     count: calculators.filter((c) => c.system === name).length,

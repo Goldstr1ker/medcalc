@@ -4,11 +4,14 @@
 //   Scr — креатинин сыворотки, мг/дл
 //   κ = 0.7 (жен.) / 0.9 (муж.);  α = -0.241 (жен.) / -0.302 (муж.)
 
+import { SYSTEMS } from '../../lib/systems.js';
+import { CREATININE_MGDL } from '../../lib/units.js';
+
 export default {
   id: 'ckd-epi-2021',
   name: 'СКФ по CKD-EPI (2021)',
   shortName: 'СКФ CKD-EPI',
-  system: 'Нефрология',
+  system: SYSTEMS.NEPHROLOGY,
   tags: ['скф', 'gfr', 'хбп', 'ckd', 'креатинин', 'почки', 'клубочковая фильтрация', 'ckd-epi'],
   description:
     'Расчёт скорости клубочковой фильтрации по креатинину сыворотки. Уравнение CKD-EPI 2021 г. (без коэффициента расы).',
@@ -16,16 +19,7 @@ export default {
   inputs: [
     { id: 'sex', label: 'Пол', type: 'select', options: ['Мужской', 'Женский'] },
     { id: 'age', label: 'Возраст', type: 'number', unit: 'лет', min: 18, max: 120 },
-    {
-      id: 'scr',
-      label: 'Креатинин сыворотки',
-      type: 'number',
-      min: 0,
-      units: [
-        { id: 'umol', label: 'мкмоль/л', factor: 1 / 88.4 },
-        { id: 'mgdl', label: 'мг/дл', factor: 1 },
-      ],
-    },
+    { id: 'scr', label: 'Креатинин сыворотки', type: 'number', min: 0, units: CREATININE_MGDL },
   ],
 
   calculate({ sex, age, scr }) {
@@ -123,6 +117,30 @@ export default {
   caveats: [
     'Формула валидна при стабильной функции почек. При ОПП, быстро меняющемся креатинине, крайних значениях мышечной массы (кахексия, ампутации, бодибилдинг), беременности — оценка неточна.',
     'Для коррекции доз ряда препаратов (например, ПОАК) традиционно используют клиренс по Кокрофту–Голту — см. отдельный калькулятор.',
+  ],
+
+  examples: [
+    {
+      note: 'Мужчина 60 лет, креатинин 180 мкмоль/л — стадия С3б',
+      inputs: { sex: 'Мужской', age: 60, scr: 180 },
+      expect: { value: 37, band: 'C3b' },
+    },
+    {
+      note: 'Женщина 80 лет, креатинин 350 мкмоль/л — терминальная ХБП',
+      inputs: { sex: 'Женский', age: 80, scr: 350 },
+      expect: { value: 11, band: 'C5' },
+    },
+    {
+      note: 'Мужчина 30 лет, креатинин 80 мкмоль/л — норма',
+      inputs: { sex: 'Мужской', age: 30, scr: 80 },
+      expect: { value: 117, band: 'C1' },
+    },
+    {
+      note: 'Тот же креатинин в мг/дл даёт тот же результат',
+      inputs: { sex: 'Мужской', age: 60, scr: 2.0362 },
+      units: { scr: 'mgdl' },
+      expect: { value: 37, band: 'C3b' },
+    },
   ],
 
   references: [
