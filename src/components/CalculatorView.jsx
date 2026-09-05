@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { compute, initialUnits, initialValues, isReady, resolveText } from '../lib/compute.js';
 import { isFavorite, toggleFavorite, pushRecent } from '../lib/storage.js';
 import Result from './Result.jsx';
@@ -22,20 +22,31 @@ export default function CalculatorView({ calc, onBack }) {
   const [units, setUnits] = useState(() => initialUnits(calc.inputs));
   const [fav, setFav] = useState(() => isFavorite(calc.id));
 
+  // Пока пользователь ничего не менял — результат не показываем, даже если
+  // все поля формально валидны. У шкал из одних select/boolean (ШКГ, Апгар,
+  // NIHSS, qSOFA, Wells) поля заполнены с первой отрисовки, и без этого флага
+  // человек видел бы «готовый» балл на экране, который только что открыл —
+  // для медицинского инструмента это читается как расчёт, а не как заглушка.
+  const [touched, setTouched] = useState(false);
+
   // Сброс состояния при переходе на другой калькулятор.
   useEffect(() => {
     setValues(initialValues(calc.inputs));
     setUnits(initialUnits(calc.inputs));
     setFav(isFavorite(calc.id));
+    setTouched(false);
     pushRecent(calc.id);
   }, [calc]);
 
+  const markTouched = useCallback(() => setTouched(true), []);
+
   const ready = isReady(calc.inputs, values);
+  const showResult = ready && touched;
 
   const { result, band, bands, inputs } = useMemo(() => {
-    if (!ready) return { result: null, band: null, bands: [], inputs: null };
+    if (!showResult) return { result: null, band: null, bands: [], inputs: null };
     return compute(calc, values, units);
-  }, [calc, values, units, ready]);
+  }, [calc, values, units, showResult]);
 
   // Тексты могут быть функциями от результата — тогда в них попадают
   // вычисленные числа (см. resolveText).
@@ -77,14 +88,20 @@ export default function CalculatorView({ calc, onBack }) {
               input={input}
               value={values[input.id]}
               unit={units[input.id]}
-              onValue={(v) => setValues((s) => ({ ...s, [input.id]: v }))}
-              onUnit={(u) => setUnits((s) => ({ ...s, [input.id]: u }))}
+              onValue={(v) => {
+                markTouched();
+                setValues((s) => ({ ...s, [input.id]: v }));
+              }}
+              onUnit={(u) => {
+                markTouched();
+                setUnits((s) => ({ ...s, [input.id]: u }));
+              }}
             />
           ))}
         </section>
       ))}
 
-      {!ready ? (
+      {!showResult ? (
         <div className="result result--empty">Заполните поля для расчёта</div>
       ) : result?.error || !band ? (
         <Result

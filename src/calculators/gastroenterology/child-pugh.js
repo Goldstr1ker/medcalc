@@ -24,7 +24,9 @@ export default {
   ],
 
   calculate({ bilirubin, albumin, inr, ascites, encephalopathy }) {
-    const bilPts = bilirubin < 34 ? 1 : bilirubin <= 50 ? 2 : 3;
+    // Пороги оригинала (Pugh, 1973) заданы в мг/дл: < 2 / 2–3 / > 3.
+    // В СИ это 34,2 и 51,3 мкмоль/л (коэффициент 17,1 мкмоль/л на 1 мг/дл).
+    const bilPts = bilirubin < 34.2 ? 1 : bilirubin <= 51.3 ? 2 : 3;
     const albPts = albumin > 35 ? 1 : albumin >= 28 ? 2 : 3;
     const inrPts = inr < 1.7 ? 1 : inr <= 2.3 ? 2 : 3;
     const ascitesPts = ASCITES.indexOf(ascites) + 1;
@@ -118,12 +120,22 @@ export default {
       },
       expect: { value: 15, band: 'C' },
     },
+    {
+      note: 'Билирубин 51 мкмоль/л (≈ 2,98 мг/дл) — ещё 2 балла за билирубин, не 3',
+      inputs: { bilirubin: 51, albumin: 40, inr: 1.2 },
+      expect: { value: 6, band: 'A' },
+    },
+    {
+      note: 'Билирубин 52 мкмоль/л (> 3 мг/дл) — уже 3 балла за билирубин',
+      inputs: { bilirubin: 52, albumin: 40, inr: 1.2 },
+      expect: { value: 7, band: 'B' },
+    },
   ],
 
   references: [
     'Pugh RN, et al. Transection of the oesophagus for bleeding oesophageal varices. Br J Surg. 1973;60(8):646–649.',
     'Child CG, Turcotte JG. Surgery and portal hypertension. In: The liver and portal hypertension. 1964.',
   ],
-  updated: '2026-09-04',
+  updated: '2026-09-06',
   version: 1,
 };

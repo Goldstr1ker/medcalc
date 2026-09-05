@@ -6,7 +6,7 @@
 // а решение «показывать его или нет» принимает App.
 export default function Disclaimer({ onAccept }) {
   return (
-    <div className="gate">
+    <main className="gate">
       <div className="gate__card">
         <h1>Прежде чем начать</h1>
         <p>
@@ -23,6 +23,6 @@ export default function Disclaimer({ onAccept }) {
           Понятно, продолжить
         </button>
       </div>
-    </div>
+    </main>
   );
 }

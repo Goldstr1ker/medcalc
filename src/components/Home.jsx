@@ -13,6 +13,10 @@ export default function Home({ onOpen, onOpenSystem, onOpenAll }) {
   const [query, setQuery] = useState('');
   const results = useMemo(() => searchCalculators(query), [query]);
 
+  // Автофокус поиска — только там, где есть мышь. На телефоне он при каждом
+  // заходе на главную поднимает клавиатуру поверх избранного и разделов.
+  const [autoFocusSearch] = useState(() => window.matchMedia?.('(pointer: fine)').matches ?? false);
+
   // Раньше localStorage читался прямо в теле рендера — то есть на каждый
   // повторный рендер, да ещё с линейным поиском по массиву на каждый id.
   const [favorites, setFavorites] = useState([]);
@@ -35,7 +39,7 @@ export default function Home({ onOpen, onOpenSystem, onOpenAll }) {
         placeholder="Поиск: СКФ, инсульт, сепсис…"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        autoFocus
+        autoFocus={autoFocusSearch}
       />
 
       {query ? (

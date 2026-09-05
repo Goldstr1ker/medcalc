@@ -27,7 +27,8 @@ export function initialUnits(inputs) {
 /**
  * Приводит значения формы к каноническому виду для calculate():
  * числа парсятся из строк, единицы переводятся по factor.
- * Незаполненное необязательное числовое поле приходит как null.
+ * Пустое числовое поле даёт null, но в calculate() не попадёт — isReady
+ * не пустит расчёт, пока все числовые поля не заполнены.
  */
 export function toCanonical(inputs, values, units) {
   const out = {};
@@ -45,10 +46,10 @@ export function toCanonical(inputs, values, units) {
   return out;
 }
 
-/** Заполнены ли все обязательные числовые поля. */
+/** Заполнены ли все числовые поля. */
 export function isReady(inputs, values) {
   return inputs.every((i) => {
-    if (i.type !== 'number' || i.optional) return true;
+    if (i.type !== 'number') return true;
     const v = values[i.id];
     return v !== '' && v != null && !Number.isNaN(Number(v));
   });

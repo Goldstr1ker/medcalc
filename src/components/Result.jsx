@@ -98,7 +98,9 @@ function Score({ spec, bands, result, band }) {
   return (
     <div className="result">
       <div className="result__value" style={{ color: COLORS[band.color] }}>
-        {result.value}
+        {/* Балл целый — показываем без дробной части («4», не «4,0»);
+            дробный (шкалы с шагом 0,5, напр. Уэллс) — с одним знаком. */}
+        {fmtNumber(result.value, Number.isInteger(result.value) ? 0 : 1)}
         <span className="result__unit"> / {max} {plural(max, ['балл', 'балла', 'баллов'])}</span>
       </div>
       <BandCaption band={band} />
@@ -118,7 +120,7 @@ function Score({ spec, bands, result, band }) {
           {result.breakdown.map((row, i) => (
             <li key={i}>
               <span>{row.label}</span>
-              <b>+{row.points}</b>
+              <b>+{fmtNumber(row.points, Number.isInteger(row.points) ? 0 : 1)}</b>
             </li>
           ))}
         </ul>

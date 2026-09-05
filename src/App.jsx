@@ -48,36 +48,38 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      {route.name === 'home' && (
-        <Home
-          onOpen={(id) => go(`#/calc/${id}`)}
-          onOpenSystem={(system) => go(`#/system/${encodeURIComponent(system)}`)}
-          onOpenAll={() => go('#/all')}
-        />
-      )}
+    <>
+      <main className="app">
+        {route.name === 'home' && (
+          <Home
+            onOpen={(id) => go(`#/calc/${id}`)}
+            onOpenSystem={(system) => go(`#/system/${encodeURIComponent(system)}`)}
+            onOpenAll={() => go('#/all')}
+          />
+        )}
 
-      {route.name === 'system' && (
-        <SystemView
-          system={route.system}
-          onOpen={(id) => go(`#/calc/${id}`)}
-          onBack={() => go('#/')}
-        />
-      )}
+        {route.name === 'system' && (
+          <SystemView
+            system={route.system}
+            onOpen={(id) => go(`#/calc/${id}`)}
+            onBack={() => go('#/')}
+          />
+        )}
 
-      {route.name === 'all' && (
-        <ListPage
-          title="Все калькуляторы"
-          items={calculators}
-          onOpen={(id) => go(`#/calc/${id}`)}
-          onBack={() => go('#/')}
-        />
-      )}
+        {route.name === 'all' && (
+          <ListPage
+            title="Все калькуляторы"
+            items={calculators}
+            onOpen={(id) => go(`#/calc/${id}`)}
+            onBack={() => go('#/')}
+          />
+        )}
 
-      {route.name === 'calc' && <CalcRoute id={route.id} onBack={() => go('#/')} />}
+        {route.name === 'calc' && <CalcRoute id={route.id} onBack={() => go('#/')} />}
+      </main>
 
       <InstallBanner />
-    </div>
+    </>
   );
 }
 
