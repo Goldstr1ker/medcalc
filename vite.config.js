@@ -1,13 +1,15 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import preact from '@preact/preset-vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Preact вместо React: тот же код на хуках, но пресет подменяет react/react-dom
+// на preact/compat через алиасы — стартовый бандл легче примерно вдвое.
 // base: './' — приложение работает из подпапки (GitHub Pages: /medcalc/) и позже
 // из обёртки Capacitor (file:// / capacitor://), без доп. настройки.
 export default defineConfig({
   base: './',
   plugins: [
-    react(),
+    preact(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
