@@ -1,14 +1,26 @@
-import { useMemo, useState } from 'react';
-import { calculators, systems, searchCalculators, getCalculator } from '../registry.js';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  calculators,
+  getCalculatorMeta,
+  prefetchCalculator,
+  searchCalculators,
+  systems,
+} from '../registry.js';
 import { getFavorites, getRecents } from '../lib/storage.js';
 import InstallSection from './InstallSection.jsx';
 
-export default function Home({ onOpen, onOpenSystem }) {
+export default function Home({ onOpen, onOpenSystem, onOpenAll }) {
   const [query, setQuery] = useState('');
   const results = useMemo(() => searchCalculators(query), [query]);
 
-  const favorites = getFavorites().map(getCalculator).filter(Boolean);
-  const recents = getRecents().map(getCalculator).filter(Boolean);
+  // Раньше localStorage читался прямо в теле рендера — то есть на каждый
+  // повторный рендер, да ещё с линейным поиском по массиву на каждый id.
+  const [favorites, setFavorites] = useState([]);
+  const [recents, setRecents] = useState([]);
+  useEffect(() => {
+    setFavorites(getFavorites().map(getCalculatorMeta).filter(Boolean));
+    setRecents(getRecents().map(getCalculatorMeta).filter(Boolean));
+  }, []);
 
   return (
     <div className="home">
@@ -28,9 +40,7 @@ export default function Home({ onOpen, onOpenSystem }) {
 
       {query ? (
         <section>
-          <h2 className="section-title">
-            Найдено: {results.length}
-          </h2>
+          <h2 className="section-title">Найдено: {results.length}</h2>
           <CalcList items={results} onOpen={onOpen} />
         </section>
       ) : (
@@ -61,9 +71,13 @@ export default function Home({ onOpen, onOpenSystem }) {
             </div>
           </section>
 
+          {/* Полный список вынесен на отдельный экран: на главной он не нужен,
+              а при полутора сотнях калькуляторов только замедлял бы её отрисовку. */}
           <section>
-            <h2 className="section-title">Все калькуляторы</h2>
-            <CalcList items={calculators} onOpen={onOpen} />
+            <button className="all-link" onClick={onOpenAll}>
+              <span>Все калькуляторы</span>
+              <span className="all-link__count">{calculators.length}</span>
+            </button>
           </section>
 
           <InstallSection />
@@ -79,7 +93,14 @@ export function CalcList({ items, onOpen }) {
     <ul className="calc-list">
       {items.map((c) => (
         <li key={c.id}>
-          <button className="calc-list__item" onClick={() => onOpen(c.id)}>
+          <button
+            className="calc-list__item"
+            onClick={() => onOpen(c.id)}
+            // Подтягиваем чанк заранее: к моменту нажатия калькулятор
+            // обычно уже загружен, и переход выглядит мгновенным.
+            onPointerEnter={() => prefetchCalculator(c.id)}
+            onTouchStart={() => prefetchCalculator(c.id)}
+          >
             <span className="calc-list__name">{c.name}</span>
             <span className="calc-list__system">{c.system}</span>
           </button>

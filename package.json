@@ -5,8 +5,10 @@
   "type": "module",
   "description": "Клинические калькуляторы и шкалы с разбором по клиническим рекомендациям. Офлайн, на русском.",
   "scripts": {
+    "index": "node scripts/build-index.mjs",
+    "predev": "npm run index",
     "dev": "vite",
-    "prebuild": "npm run check",
+    "prebuild": "npm run index && npm run check",
     "build": "vite build",
     "preview": "vite preview --port 4173 --strictPort",
     "validate": "node scripts/validate-calculators.mjs",

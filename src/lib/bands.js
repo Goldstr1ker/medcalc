@@ -33,9 +33,20 @@ export function resolveBands(spec, inputs) {
 }
 
 // Band, в который попадает значение: самый верхний, у которого min <= value.
+//
+// Один линейный проход без копирования и сортировки: функция вызывается
+// на каждый рендер калькулятора, а диапазонов всего несколько — сортировать
+// их заново каждый раз было чистой тратой.
 export function resolveBand(value, bands) {
-  const sorted = [...bands].sort((a, b) => b.min - a.min);
-  return sorted.find((b) => value >= b.min) ?? sorted[sorted.length - 1];
+  let match = null;
+  let lowest = null;
+  for (const b of bands) {
+    if (lowest === null || b.min < lowest.min) lowest = b;
+    if (value >= b.min && (match === null || b.min > match.min)) match = b;
+  }
+  // Значение ниже самого нижнего порога — отдаём нижний диапазон,
+  // чтобы результат не оказался вовсе без трактовки.
+  return match ?? lowest;
 }
 
 // Для шкалы-полоски: к каждому band'у добавляет [from, to] в пределах [scaleMin, scaleMax].

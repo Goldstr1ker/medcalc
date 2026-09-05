@@ -6,3 +6,7 @@ dist-ssr
 .vite
 dev-server.log
 dev-dist
+
+# Генерируется из src/calculators/**/*.js перед dev и build (scripts/build-index.mjs).
+# Не коммитим, чтобы индекс физически не мог разъехаться с калькуляторами.
+src/catalog.generated.js

@@ -1,46 +1,85 @@
 // Реестр калькуляторов.
 //
-// Каждый файл в src/calculators/**/*.js экспортирует по умолчанию один объект-калькулятор.
-// import.meta.glob подхватывает их автоматически — чтобы добавить калькулятор,
-// достаточно создать новый файл, править этот реестр не нужно.
+// Разделён на две части:
+//   1. catalog — лёгкий индекс метаданных, генерируется скриптом и грузится сразу.
+//      Из него живут главная, разделы и поиск.
+//   2. loaders — тела калькуляторов, каждое отдельным чанком, грузятся по требованию.
+//
+// import.meta.glob БЕЗ eager возвращает не модули, а функции-загрузчики, поэтому
+// Vite нарезает каждый калькулятор в свой чанк. Офлайн от этого не страдает:
+// Workbox всё равно кладёт все чанки в precache, и загрузка идёт из кеша.
+//
+// Побочный, но важный выигрыш: правка одного калькулятора меняет хеш только
+// его чанка. Раньше менялся хеш всего бандла, и у офлайн-пользователей
+// service worker перекачивал всё целиком.
 
+import { catalog } from './catalog.generated.js';
 import { systemOrderIndex } from './lib/systems.js';
 
-const modules = import.meta.glob('./calculators/**/*.js', { eager: true });
+const loaders = import.meta.glob('./calculators/**/*.js');
 
-export const calculators = Object.values(modules)
-  .map((m) => m.default)
-  .filter(Boolean)
-  .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+/** Метаданные всех калькуляторов (без тел). Отсортированы по названию. */
+export const calculators = catalog;
+
+const byId = new Map(catalog.map((c) => [c.id, c]));
+
+/** Метаданные по id — без загрузки тела. Доступны мгновенно. */
+export function getCalculatorMeta(id) {
+  return byId.get(id) ?? null;
+}
 
 // Разделы (системы органов) с числом калькуляторов в каждом.
-// Порядок — клинический, из lib/systems.js, а не алфавитный.
-// Разделы без калькуляторов сюда не попадают.
-export const systems = [...new Set(calculators.map((c) => c.system))]
-  .sort((a, b) => systemOrderIndex(a) - systemOrderIndex(b))
-  .map((name) => ({
-    name,
-    count: calculators.filter((c) => c.system === name).length,
-  }));
+// Порядок — клинический, из lib/systems.js. Пустые разделы сюда не попадают.
+const counts = new Map();
+for (const c of catalog) counts.set(c.system, (counts.get(c.system) ?? 0) + 1);
 
-export function getCalculator(id) {
-  return calculators.find((c) => c.id === id) || null;
-}
+export const systems = [...counts.keys()]
+  .sort((a, b) => systemOrderIndex(a) - systemOrderIndex(b))
+  .map((name) => ({ name, count: counts.get(name) }));
 
 export function getBySystem(system) {
-  return calculators.filter((c) => c.system === system);
+  return catalog.filter((c) => c.system === system);
 }
 
-// Поиск по названию, разделу, тегам и описанию. Все слова запроса должны совпасть.
+// Поиск по предвычисленной строке: name + shortName + раздел + описание + теги,
+// уже в нижнем регистре (собирается генератором индекса). Раньше эта строка
+// пересобиралась для каждого калькулятора на каждое нажатие клавиши.
 export function searchCalculators(query) {
   const q = query.trim().toLowerCase();
   if (!q) return [];
   const parts = q.split(/\s+/);
-  return calculators.filter((c) => {
-    const hay = [c.name, c.shortName, c.system, c.description, ...(c.tags || [])]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
-    return parts.every((p) => hay.includes(p));
-  });
+  return catalog.filter((c) => parts.every((p) => c.search.includes(p)));
+}
+
+// --- загрузка тел ---
+
+// Кешируем промис, а не результат: если по одному калькулятору прилетело
+// два запроса подряд, загрузка всё равно будет одна.
+const cache = new Map();
+
+/** Загружает тело калькулятора. Возвращает объект калькулятора или null. */
+export function loadCalculator(id) {
+  const meta = byId.get(id);
+  if (!meta) return Promise.resolve(null);
+  if (cache.has(id)) return cache.get(id);
+
+  const loader = loaders[meta.path];
+  if (!loader) {
+    return Promise.reject(new Error(`нет загрузчика для ${meta.path}`));
+  }
+
+  const promise = loader().then((mod) => mod.default);
+  // Неудачную загрузку (обрыв сети) не запоминаем — иначе повтор был бы
+  // невозможен до перезагрузки страницы.
+  promise.catch(() => cache.delete(id));
+  cache.set(id, promise);
+  return promise;
+}
+
+/**
+ * Заранее подтянуть чанк — вызывается при наведении/касании пункта списка.
+ * К моменту нажатия калькулятор обычно уже загружен.
+ */
+export function prefetchCalculator(id) {
+  loadCalculator(id).catch(() => {});
 }
