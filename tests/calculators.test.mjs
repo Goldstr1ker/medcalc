@@ -14,8 +14,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { loadCalculators } from '../scripts/lib/load-calculators.mjs';
-import { initialUnits, initialValues, isReady, toCanonical } from '../src/lib/compute.js';
-import { resolveBand } from '../src/lib/bands.js';
+import { initialUnits, initialValues, isReady, resolveText, toCanonical } from '../src/lib/compute.js';
+import { resolveBand, resolveBands } from '../src/lib/bands.js';
 import { round } from '../src/lib/format.js';
 
 const loaded = await loadCalculators();
@@ -36,14 +36,32 @@ for (const { file, calc } of loaded) {
           'пример не заполняет все обязательные числовые поля',
         );
 
-        const result = calc.calculate(toCanonical(calc.inputs, values, units));
+        const canonical = toCanonical(calc.inputs, values, units);
+        const result = calc.calculate(canonical);
         assert.ok(
           Number.isFinite(result?.value),
           `calculate() вернул не число: ${JSON.stringify(result?.value)}`,
         );
 
-        const band = resolveBand(result.value, calc.result.bands);
+        // Диапазоны могут зависеть от введённых значений (напр. пол у QTc).
+        const bandList = resolveBands(calc.result, canonical);
+        assert.ok(bandList?.length, 'result.bands не дал ни одного диапазона');
+
+        const band = resolveBand(result.value, bandList);
         assert.ok(band, `значение ${result.value} не попало ни в один диапазон`);
+
+        // Тексты-функции не должны падать и обязаны возвращать непустую строку.
+        const ctx = { result, band, inputs: canonical };
+        const text = resolveText(calc.interpretation?.[band.id], ctx);
+        assert.ok(
+          typeof text === 'string' && text.trim(),
+          `interpretation["${band.id}"] не дал текста`,
+        );
+        const guidance = resolveText(calc.guidance?.[band.id], ctx);
+        if (guidance) {
+          assert.ok(guidance.source, `guidance["${band.id}"]: нет source`);
+          assert.ok(guidance.points?.length, `guidance["${band.id}"]: пустой points`);
+        }
 
         if (ex.expect.value !== undefined) {
           const shown = round(result.value, result.decimals ?? 0);

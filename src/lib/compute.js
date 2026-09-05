@@ -5,7 +5,7 @@
 // внутри компонента, тесты проверяли бы её копию — и расхождение между копией
 // и оригиналом никто бы не заметил.
 
-import { resolveBand } from './bands.js';
+import { resolveBand, resolveBands } from './bands.js';
 
 /** Значение поля по умолчанию. */
 export function initialValue(input) {
@@ -55,14 +55,32 @@ export function isReady(inputs, values) {
 }
 
 /**
- * Полный расчёт. Возвращает { result, band }.
+ * Тексты интерпретации и рекомендаций могут быть не строкой, а функцией
+ * от контекста — чтобы подставлять вычисленные числа. Например, у формулы
+ * Паркленда полезно назвать целевой диурез именно для этой массы тела,
+ * а не абстрактные «0,5 мл/кг/ч».
+ *
+ * @param value строка/объект или функция (ctx) => то же самое
+ * @param ctx   { result, band, inputs }
+ */
+export function resolveText(value, ctx) {
+  return typeof value === 'function' ? value(ctx) : value;
+}
+
+/**
+ * Полный расчёт. Возвращает { result, band, bands, inputs }.
  * При исключении в calculate() — { result: { error }, band: null }.
+ *
+ * bands и inputs возвращаются наружу, потому что нужны дальше: bands —
+ * для отрисовки шкалы, inputs — для подстановки чисел в тексты.
  */
 export function compute(calc, values, units) {
   try {
-    const result = calc.calculate(toCanonical(calc.inputs, values, units));
-    return { result, band: resolveBand(result.value, calc.result.bands) };
+    const inputs = toCanonical(calc.inputs, values, units);
+    const result = calc.calculate(inputs);
+    const bands = resolveBands(calc.result, inputs);
+    return { result, band: resolveBand(result.value, bands), bands, inputs };
   } catch (e) {
-    return { result: { error: String(e?.message || e) }, band: null };
+    return { result: { error: String(e?.message || e) }, band: null, bands: [], inputs: null };
   }
 }

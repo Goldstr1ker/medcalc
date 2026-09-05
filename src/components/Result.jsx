@@ -2,7 +2,9 @@ import { bandRanges, COLORS } from '../lib/bands.js';
 import { fmtNumber, plural } from '../lib/format.js';
 
 // Выбор представления результата по calc.result.type.
-export default function Result({ spec, result, band }) {
+// bands приходят снаружи уже вычисленными: они могут зависеть от введённых
+// значений (см. resolveBands), поэтому брать их из spec напрямую нельзя.
+export default function Result({ spec, bands, result, band }) {
   if (result?.error) {
     return <div className="result result--error">Не удалось рассчитать: {result.error}</div>;
   }
@@ -10,8 +12,8 @@ export default function Result({ spec, result, band }) {
     // Значение не попало ни в один диапазон — ошибка в схеме калькулятора.
     return <div className="result result--error">Результат вне заданных диапазонов</div>;
   }
-  if (spec.type === 'gauge') return <Gauge spec={spec} result={result} band={band} />;
-  if (spec.type === 'score') return <Score spec={spec} result={result} band={band} />;
+  if (spec.type === 'gauge') return <Gauge spec={spec} bands={bands} result={result} band={band} />;
+  if (spec.type === 'score') return <Score spec={spec} bands={bands} result={result} band={band} />;
   return <PlainValue result={result} band={band} />;
 }
 
@@ -33,7 +35,9 @@ function Details({ items }) {
       {items.map((d, i) => (
         <li key={i}>
           <span>{d.label}</span>
-          <b>
+          {/* color — для подшкал по системам органов (SOFA): сразу видно,
+              какая система тянет общий балл вверх */}
+          <b style={d.color ? { color: COLORS[d.color] } : undefined}>
             {fmtNumber(d.value, d.decimals ?? 0)}
             {d.unit ? ` ${d.unit}` : ''}
           </b>
@@ -43,9 +47,9 @@ function Details({ items }) {
   );
 }
 
-function Gauge({ spec, result, band }) {
+function Gauge({ spec, bands, result, band }) {
   const { min, max } = spec;
-  const ranges = bandRanges(spec.bands, min, max);
+  const ranges = bandRanges(bands, min, max);
   const pct = (v) => Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100));
   const markerPct = pct(result.value);
 
@@ -87,8 +91,8 @@ function Gauge({ spec, result, band }) {
   );
 }
 
-function Score({ spec, result, band }) {
-  const max = spec.max ?? Math.max(...spec.bands.map((b) => b.min)) + 2;
+function Score({ spec, bands, result, band }) {
+  const max = spec.max ?? Math.max(...bands.map((b) => b.min)) + 2;
   const pips = Array.from({ length: max }, (_, i) => i + 1);
 
   return (
@@ -119,6 +123,8 @@ function Score({ spec, result, band }) {
           ))}
         </ul>
       ) : null}
+
+      <Details items={result.details} />
     </div>
   );
 }

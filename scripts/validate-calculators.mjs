@@ -9,6 +9,8 @@
 
 import { loadCalculators } from './lib/load-calculators.mjs';
 import { ALL_SYSTEMS } from '../src/lib/systems.js';
+import { resolveBands } from '../src/lib/bands.js';
+import { initialUnits, initialValues, toCanonical } from '../src/lib/compute.js';
 
 const errors = [];
 const notes = [];
@@ -75,11 +77,55 @@ for (const { file, calc } of loaded) {
     if (input.units?.length === 1) {
       note(file, `${where}: список units из одного элемента — проще задать unit строкой`);
     }
+    if (input.group !== undefined && (typeof input.group !== 'string' || !input.group.trim())) {
+      err(file, `${where}: group должен быть непустой строкой`);
+    }
+  }
+
+  // Поля одной группы должны идти подряд: рендер разбивает список по сменам
+  // группы, поэтому разорванная группа даст два одинаковых заголовка.
+  const groupRuns = [];
+  for (const input of calc.inputs ?? []) {
+    const g = input.group ?? null;
+    if (groupRuns[groupRuns.length - 1] !== g) groupRuns.push(g);
+  }
+  const repeated = groupRuns.filter((g, i) => g && groupRuns.indexOf(g) !== i);
+  if (repeated.length) {
+    err(file, `группы полей идут вразбивку: ${[...new Set(repeated)].join(', ')} — соберите поля каждой группы подряд`);
   }
 
   // --- диапазоны результата ---
-  const bands = calc.result?.bands ?? [];
+  //
+  // bands может быть функцией от введённых значений (пороги, зависящие от пола
+  // и т.п.). Статически такой набор не проверить, поэтому вычисляем его на
+  // входных данных из examples и объединяем все полученные диапазоны.
+  // Побочный эффект полезный: чтобы диапазон вообще проверялся, автор обязан
+  // покрыть примером ветку, в которой этот диапазон возникает.
+  const dynamicBands = typeof calc.result?.bands === 'function';
+  let bands = [];
   const bandIds = new Set();
+
+  if (dynamicBands) {
+    for (const [i, ex] of (calc.examples ?? []).entries()) {
+      try {
+        const values = { ...initialValues(calc.inputs), ...(ex.inputs ?? {}) };
+        const unitChoice = { ...initialUnits(calc.inputs), ...(ex.units ?? {}) };
+        const produced = resolveBands(calc.result, toCanonical(calc.inputs, values, unitChoice));
+        if (!produced?.length) {
+          err(file, `examples[${i}]: result.bands вернул пустой набор диапазонов`);
+          continue;
+        }
+        for (const b of produced) {
+          if (!bands.some((x) => x.id === b.id)) bands.push(b);
+        }
+      } catch (e) {
+        err(file, `examples[${i}]: result.bands упал с ошибкой: ${e.message}`);
+      }
+    }
+  } else {
+    bands = calc.result?.bands ?? [];
+  }
+
   if (!bands.length) err(file, 'result.bands пуст — результат не с чем сопоставить');
   if (calc.result?.type && !RESULT_TYPES.has(calc.result.type)) {
     err(file, `неизвестный result.type "${calc.result.type}"`);
@@ -99,8 +145,14 @@ for (const { file, calc } of loaded) {
     if (typeof b.min !== 'number' || !Number.isFinite(b.min)) {
       err(file, `диапазон "${b.id}": min должен быть конечным числом`);
     }
-    if (seenMin.has(b.min)) err(file, `диапазон "${b.id}": min=${b.min} уже занят другим диапазоном`);
-    seenMin.add(b.min);
+    // У динамических диапазонов набор собран из разных примеров, поэтому
+    // совпадение границ между ветками — норма, а не ошибка.
+    if (!dynamicBands) {
+      if (seenMin.has(b.min)) {
+        err(file, `диапазон "${b.id}": min=${b.min} уже занят другим диапазоном`);
+      }
+      seenMin.add(b.min);
+    }
     if (b.color && !COLORS.has(b.color)) err(file, `диапазон "${b.id}": неизвестный цвет "${b.color}"`);
   }
 
@@ -153,6 +205,23 @@ for (const { file, calc } of loaded) {
       else if (!input.units?.some((u) => u.id === ex.units[key])) {
         err(file, `${where}: у поля "${key}" нет единицы "${ex.units[key]}"`);
       }
+    }
+
+    // Форма details проверяется здесь, а не в тестах: тесты сверяют числа,
+    // валидатор — что структура пригодна для отрисовки (цвет из палитры и т.п.).
+    try {
+      const values = { ...initialValues(calc.inputs), ...(ex.inputs ?? {}) };
+      const unitChoice = { ...initialUnits(calc.inputs), ...(ex.units ?? {}) };
+      const produced = calc.calculate(toCanonical(calc.inputs, values, unitChoice));
+      for (const [j, d] of (produced?.details ?? []).entries()) {
+        if (!d.label) err(file, `${where}: details[${j}] без label`);
+        if (!Number.isFinite(d.value)) err(file, `${where}: details[${j}] value не число`);
+        if (d.color && !COLORS.has(d.color)) {
+          err(file, `${where}: details[${j}] неизвестный цвет "${d.color}"`);
+        }
+      }
+    } catch (e) {
+      err(file, `${where}: calculate() упал с ошибкой: ${e.message}`);
     }
   }
 

@@ -17,6 +17,21 @@ export const COLORS = {
   slate: '#475569',
 };
 
+/**
+ * Приводит result.bands к массиву.
+ *
+ * Диапазоны можно задавать функцией от введённых значений — это нужно там,
+ * где норма зависит от пациента, а не только от результата. Пример: у QTc
+ * порог патологии у женщин на 10 мс выше, чем у мужчин. Раньше схема этого
+ * не позволяла, и приходилось брать один усреднённый порог с оговоркой.
+ *
+ * @param spec   объект result калькулятора
+ * @param inputs канонические значения (после перевода единиц)
+ */
+export function resolveBands(spec, inputs) {
+  return typeof spec.bands === 'function' ? spec.bands(inputs) : spec.bands;
+}
+
 // Band, в который попадает значение: самый верхний, у которого min <= value.
 export function resolveBand(value, bands) {
   const sorted = [...bands].sort((a, b) => b.min - a.min);

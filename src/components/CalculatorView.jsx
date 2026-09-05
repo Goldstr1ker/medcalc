@@ -1,7 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { compute, initialUnits, initialValues, isReady } from '../lib/compute.js';
+import { compute, initialUnits, initialValues, isReady, resolveText } from '../lib/compute.js';
 import { isFavorite, toggleFavorite, pushRecent } from '../lib/storage.js';
 import Result from './Result.jsx';
+
+// Разбивает поля на блоки по input.group, сохраняя порядок объявления.
+// Поля без группы образуют блок без заголовка. Нужно для длинных шкал
+// (SOFA, APACHE II, NIHSS), где плоская простыня полей нечитаема на телефоне.
+function groupInputs(inputs) {
+  const blocks = [];
+  for (const input of inputs) {
+    const group = input.group ?? null;
+    const last = blocks[blocks.length - 1];
+    if (!last || last.group !== group) blocks.push({ group, items: [input] });
+    else last.items.push(input);
+  }
+  return blocks;
+}
 
 export default function CalculatorView({ calc, onBack }) {
   const [values, setValues] = useState(() => initialValues(calc.inputs));
@@ -18,13 +32,18 @@ export default function CalculatorView({ calc, onBack }) {
 
   const ready = isReady(calc.inputs, values);
 
-  const { result, band } = useMemo(() => {
-    if (!ready) return { result: null, band: null };
+  const { result, band, bands, inputs } = useMemo(() => {
+    if (!ready) return { result: null, band: null, bands: [], inputs: null };
     return compute(calc, values, units);
   }, [calc, values, units, ready]);
 
-  const interpretation = band ? calc.interpretation?.[band.id] : null;
-  const guidance = band ? calc.guidance?.[band.id] : null;
+  // Тексты могут быть функциями от результата — тогда в них попадают
+  // вычисленные числа (см. resolveText).
+  const ctx = { result, band, inputs };
+  const interpretation = band ? resolveText(calc.interpretation?.[band.id], ctx) : null;
+  const guidance = band ? resolveText(calc.guidance?.[band.id], ctx) : null;
+
+  const fieldBlocks = groupInputs(calc.inputs);
 
   return (
     <div className="calc">
@@ -49,26 +68,34 @@ export default function CalculatorView({ calc, onBack }) {
 
       {calc.description ? <p className="calc__desc">{calc.description}</p> : null}
 
-      <section className="fields">
-        {calc.inputs.map((input) => (
-          <Field
-            key={input.id}
-            input={input}
-            value={values[input.id]}
-            unit={units[input.id]}
-            onValue={(v) => setValues((s) => ({ ...s, [input.id]: v }))}
-            onUnit={(u) => setUnits((s) => ({ ...s, [input.id]: u }))}
-          />
-        ))}
-      </section>
+      {fieldBlocks.map((block, i) => (
+        <section className="fields" key={block.group ?? `block-${i}`}>
+          {block.group ? <h2 className="fields__group">{block.group}</h2> : null}
+          {block.items.map((input) => (
+            <Field
+              key={input.id}
+              input={input}
+              value={values[input.id]}
+              unit={units[input.id]}
+              onValue={(v) => setValues((s) => ({ ...s, [input.id]: v }))}
+              onUnit={(u) => setUnits((s) => ({ ...s, [input.id]: u }))}
+            />
+          ))}
+        </section>
+      ))}
 
       {!ready ? (
         <div className="result result--empty">Заполните поля для расчёта</div>
       ) : result?.error || !band ? (
-        <Result spec={calc.result} result={result ?? { error: 'неизвестная ошибка' }} band={band} />
+        <Result
+          spec={calc.result}
+          bands={bands}
+          result={result ?? { error: 'неизвестная ошибка' }}
+          band={band}
+        />
       ) : (
         <>
-          <Result spec={calc.result} result={result} band={band} />
+          <Result spec={calc.result} bands={bands} result={result} band={band} />
 
           {interpretation ? <p className="interp">{interpretation}</p> : null}
 

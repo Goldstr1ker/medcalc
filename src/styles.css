@@ -232,6 +232,21 @@ h2 {
   margin: 20px 0;
 }
 
+/* Заголовок группы полей — для длинных шкал (SOFA и т.п.) */
+.fields__group {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 4px 0 -2px;
+}
+
+.fields + .fields {
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
 .field {
   display: flex;
   flex-direction: column;

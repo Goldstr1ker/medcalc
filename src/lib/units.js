@@ -22,6 +22,12 @@ export const CREATININE_MGDL = [
   { id: 'mgdl', label: 'мг/дл', factor: 1 },
 ];
 
+/** Креатинин. calculate() получит мкмоль/л (пороги SOFA заданы в единицах СИ). */
+export const CREATININE_UMOL = [
+  { id: 'umol', label: 'мкмоль/л', factor: 1 },
+  { id: 'mgdl', label: 'мг/дл', factor: UMOL_PER_MGDL_CREATININE },
+];
+
 /** Билирубин. calculate() получит мкмоль/л (пороги Чайлд-Пью заданы в СИ). */
 export const BILIRUBIN_UMOL = [
   { id: 'umol', label: 'мкмоль/л', factor: 1 },
