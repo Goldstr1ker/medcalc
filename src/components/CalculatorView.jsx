@@ -29,12 +29,23 @@ export default function CalculatorView({ calc, onBack }) {
   // для медицинского инструмента это читается как расчёт, а не как заглушка.
   const [touched, setTouched] = useState(false);
 
+  // Поля, где браузер держит нераспознанный текст (input.validity.badInput).
+  //
+  // Ключевая деталь: у <input type="number"> с мусором внутри свойство value
+  // равно ПУСТОЙ СТРОКЕ, а введённый текст остаётся видимым на экране. То есть
+  // человек видит в поле «70e», а приложение считает поле незаполненным и
+  // пишет «Заполните поля для расчёта» — сообщение, которое прямо противоречит
+  // тому, что на экране. Отсюда отдельное состояние: значение нам недоступно,
+  // но факт «здесь не число» — доступен, и сказать об этом надо явно.
+  const [badInputs, setBadInputs] = useState(/** @type {Record<string, boolean>} */ ({}));
+
   // Сброс состояния при переходе на другой калькулятор.
   useEffect(() => {
     setValues(initialValues(calc.inputs));
     setUnits(initialUnits(calc.inputs));
     setFav(isFavorite(calc.id));
     setTouched(false);
+    setBadInputs({});
     pushRecent(calc.id);
   }, [calc]);
 
@@ -42,6 +53,7 @@ export default function CalculatorView({ calc, onBack }) {
 
   const ready = isReady(calc.inputs, values);
   const showResult = ready && touched;
+  const hasBadInput = Object.values(badInputs).some(Boolean);
 
   const { result, band, bands, inputs } = useMemo(() => {
     if (!showResult) return { result: null, band: null, bands: [], inputs: null };
@@ -88,9 +100,13 @@ export default function CalculatorView({ calc, onBack }) {
               input={input}
               value={values[input.id]}
               unit={units[input.id]}
-              onValue={(v) => {
+              badInput={badInputs[input.id] ?? false}
+              onValue={(v, badInput = false) => {
                 markTouched();
                 setValues((s) => ({ ...s, [input.id]: v }));
+                setBadInputs((s) =>
+                  s[input.id] === badInput ? s : { ...s, [input.id]: badInput },
+                );
               }}
               onUnit={(u) => {
                 markTouched();
@@ -102,7 +118,11 @@ export default function CalculatorView({ calc, onBack }) {
       ))}
 
       {!showResult ? (
-        <div className="result result--empty">Заполните поля для расчёта</div>
+        <div className={`result result--${hasBadInput ? 'error' : 'empty'}`}>
+          {hasBadInput
+            ? 'Проверьте отмеченные поля — там не число'
+            : 'Заполните поля для расчёта'}
+        </div>
       ) : result?.error || !band ? (
         <Result
           spec={calc.result}
@@ -163,7 +183,7 @@ export default function CalculatorView({ calc, onBack }) {
   );
 }
 
-function Field({ input, value, unit, onValue, onUnit }) {
+function Field({ input, value, unit, badInput, onValue, onUnit }) {
   if (input.type === 'select') {
     return (
       <label className="field">
@@ -193,7 +213,7 @@ function Field({ input, value, unit, onValue, onUnit }) {
 
   // number
   return (
-    <label className="field">
+    <label className={`field${badInput ? ' field--invalid' : ''}`}>
       <span className="field__label">
         {input.label}
         {input.unit ? <span className="field__unit">, {input.unit}</span> : null}
@@ -207,7 +227,10 @@ function Field({ input, value, unit, onValue, onUnit }) {
           max={input.max}
           step="any"
           placeholder="—"
-          onChange={(e) => onValue(e.target.value)}
+          aria-invalid={badInput || undefined}
+          // Второй аргумент — badInput: при нераспознанном тексте value приходит
+          // пустым, и без этого флага поле неотличимо от незаполненного.
+          onChange={(e) => onValue(e.currentTarget.value, e.currentTarget.validity.badInput)}
           onWheel={(e) => e.currentTarget.blur()}
         />
         {input.units ? (
@@ -218,6 +241,11 @@ function Field({ input, value, unit, onValue, onUnit }) {
           </select>
         ) : null}
       </div>
+      {badInput ? (
+        <span className="field__error">
+          Введите число — дробную часть через запятую или точку
+        </span>
+      ) : null}
     </label>
   );
 }
