@@ -12,6 +12,7 @@
     "build": "vite build",
     "preview": "vite preview --port 4173 --strictPort",
     "validate": "node scripts/validate-calculators.mjs",
+    "pretest": "npm run index",
     "test": "node --test",
     "check": "npm run validate && npm test"
   },
