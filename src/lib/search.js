@@ -18,18 +18,19 @@ import { transliterate } from './transliterate.js';
  * Строит два уровня текста для поиска по одному калькулятору:
  *   primary   — название и короткое имя (совпадение здесь весит больше);
  *   secondary — раздел, описание, теги.
- * В оба уровня вшита транслитерация — один раз здесь, а не на каждый запрос.
+ *
+ * Транслитерация здесь НЕ подмешивается: раньше в индекс писалась склейка
+ * «текст + его транслитерация», и это ровно удваивало вес индекса — а он
+ * грузится целиком при старте и растёт линейно с числом калькуляторов.
+ * Теперь латинская форма считается в рантайме и кешируется (см. translitOf).
  */
 export function buildSearchFields({ name, shortName, system, description, tags }) {
-  const primaryRaw = [name, shortName].filter(Boolean).join(' ').toLowerCase();
-  const secondaryRaw = [system, description, ...(tags ?? [])]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
   return {
-    primary: `${primaryRaw} ${transliterate(primaryRaw)}`,
-    secondary: `${secondaryRaw} ${transliterate(secondaryRaw)}`,
+    primary: [name, shortName].filter(Boolean).join(' ').toLowerCase(),
+    secondary: [system, description, ...(tags ?? [])]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase(),
   };
 }
 
@@ -37,15 +38,46 @@ const WEIGHT_NAME_WORD = 10; // термин совпал с началом на
 const WEIGHT_NAME_SUBSTRING = 6; // термин — часть слова в названии
 const WEIGHT_SECONDARY = 2; // термин нашёлся только в разделе/описании/тегах
 
+// Латинская форма полей поиска. Считается лениво, один раз на запись каталога,
+// и живёт ровно столько же, сколько сама запись (WeakMap не держит её в памяти
+// после того, как каталог стал не нужен). Первый поиск за сеанс делает один
+// проход по каталогу, дальше — только сравнение строк.
+const translitCache = new WeakMap();
+
+function translitOf(entry) {
+  let cached = translitCache.get(entry);
+  if (!cached) {
+    cached = {
+      primary: transliterate(entry.primary),
+      secondary: transliterate(entry.secondary),
+    };
+    translitCache.set(entry, cached);
+  }
+  return cached;
+}
+
 function isWordMatch(text, term) {
   return text === term || text.startsWith(`${term} `) || text.includes(` ${term}`);
 }
 
-/** Вес одного слова запроса для одного калькулятора. null — слово не найдено вовсе. */
+/**
+ * Вес одного слова запроса для одного калькулятора. null — слово не найдено вовсе.
+ * Каждый уровень проверяется и по исходному тексту, и по его транслитерации,
+ * чтобы «skf» находил «СКФ». Латиница транслитерацию проходит без изменений,
+ * поэтому запросы вроде «ckd-epi» работают в обеих ветках одинаково.
+ */
 function scoreTerm(entry, term) {
-  if (isWordMatch(entry.primary, term)) return WEIGHT_NAME_WORD;
-  if (entry.primary.includes(term)) return WEIGHT_NAME_SUBSTRING;
-  if (entry.secondary.includes(term)) return WEIGHT_SECONDARY;
+  const latin = translitOf(entry);
+
+  if (isWordMatch(entry.primary, term) || isWordMatch(latin.primary, term)) {
+    return WEIGHT_NAME_WORD;
+  }
+  if (entry.primary.includes(term) || latin.primary.includes(term)) {
+    return WEIGHT_NAME_SUBSTRING;
+  }
+  if (entry.secondary.includes(term) || latin.secondary.includes(term)) {
+    return WEIGHT_SECONDARY;
+  }
   return null;
 }
 

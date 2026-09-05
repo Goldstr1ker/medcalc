@@ -22,13 +22,34 @@ test('транслитерация не трогает то, что уже ла�
   assert.equal(transliterate('4t'), '4t');
 });
 
-test('buildSearchFields: запрос латиницей находит кириллическое название', () => {
-  const { primary } = buildSearchFields({
-    name: 'СКФ по CKD-EPI (2021)',
-    shortName: 'СКФ CKD-EPI',
-  });
+test('поиск латиницей находит кириллическое название', () => {
+  const name = 'СКФ по CKD-EPI (2021)';
+  const items = [{ name, ...buildSearchFields({ name, shortName: 'СКФ CKD-EPI' }) }];
   // «skf» — это ровно транслитерация «скф», а не отдельно прописанный тег.
-  assert.ok(primary.includes('skf'));
+  assert.deepEqual(rankBySearch(items, 'skf').map((r) => r.name), [name]);
+});
+
+test('индекс хранит только исходный текст — транслитерация считается в рантайме', () => {
+  // Раньше buildSearchFields склеивал текст с его транслитерацией, и индекс
+  // весил вдвое больше нужного. Проверяем, что латиница в поля не подмешана.
+  const { primary, secondary } = buildSearchFields({
+    name: 'СКФ',
+    description: 'скорость клубочковой фильтрации',
+  });
+  assert.equal(primary, 'скф');
+  assert.ok(!primary.includes('skf'), 'primary не должен содержать транслитерацию');
+  assert.ok(!secondary.includes('skorost'), 'secondary не должен содержать транслитерацию');
+});
+
+test('поиск кириллицей и латиницей даёт одинаковый результат', () => {
+  const items = [
+    { name: 'Сепсис', ...buildSearchFields({ name: 'Сепсис' }) },
+    { name: 'Другое', ...buildSearchFields({ name: 'Другое', tags: ['почки'] }) },
+  ];
+  assert.deepEqual(
+    rankBySearch(items, 'сепсис').map((r) => r.name),
+    rankBySearch(items, 'sepsis').map((r) => r.name),
+  );
 });
 
 test('rankBySearch: совпадение в названии ранжируется выше совпадения в описании', () => {
