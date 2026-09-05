@@ -15,6 +15,7 @@
 import { writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { loadCalculators, REPO_ROOT } from './lib/load-calculators.mjs';
+import { buildSearchFields } from '../src/lib/search.js';
 
 const OUT = join(REPO_ROOT, 'src/catalog.generated.js');
 
@@ -26,12 +27,10 @@ const entries = loaded
     // относительно src/, с ведущим './'.
     const fromSrc = relative(join(REPO_ROOT, 'src'), join(REPO_ROOT, file)).replace(/\\/g, '/');
 
-    // Строка для поиска собирается здесь, один раз на сборку, а не на каждое
-    // нажатие клавиши в поле поиска.
-    const search = [calc.name, calc.shortName, calc.system, calc.description, ...(calc.tags ?? [])]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
+    // Поля для поиска (с транслитерацией) считаются здесь, один раз на сборку
+    // и независимо для каждого калькулятора — а не на каждое нажатие клавиши
+    // и не пересчётом по всему каталогу разом.
+    const { primary, secondary } = buildSearchFields(calc);
 
     return {
       id: calc.id,
@@ -40,7 +39,8 @@ const entries = loaded
       shortName: calc.shortName ?? null,
       system: calc.system,
       description: calc.description,
-      search,
+      primary,
+      secondary,
     };
   })
   .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
@@ -57,7 +57,7 @@ export const catalog = ${JSON.stringify(entries, null, 2)};
 
 writeFileSync(OUT, body, 'utf8');
 
-const totalSearchChars = entries.reduce((n, e) => n + e.search.length, 0);
+const totalSearchChars = entries.reduce((n, e) => n + e.primary.length + e.secondary.length, 0);
 console.log(
   `Индекс собран: ${entries.length} калькуляторов, ` +
     `${(Buffer.byteLength(body, 'utf8') / 1024).toFixed(1)} КБ ` +

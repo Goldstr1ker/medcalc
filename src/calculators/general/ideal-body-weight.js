@@ -7,7 +7,7 @@ const CM_PER_INCH = 2.54;
 export default {
   id: 'ideal-body-weight',
   name: 'Идеальная и скорректированная масса тела',
-  shortName: 'ИМТ Девайна',
+  shortName: 'Масса по Девайну',
   system: SYSTEMS.GENERAL,
   tags: ['идеальная масса тела', 'скорректированная масса тела', 'девайн', 'дозирование', 'ожирение'],
   description:

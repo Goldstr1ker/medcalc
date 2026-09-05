@@ -15,6 +15,7 @@
 
 import { catalog } from './catalog.generated.js';
 import { systemOrderIndex } from './lib/systems.js';
+import { rankBySearch } from './lib/search.js';
 
 const loaders = import.meta.glob('./calculators/**/*.js');
 
@@ -41,14 +42,13 @@ export function getBySystem(system) {
   return catalog.filter((c) => c.system === system);
 }
 
-// Поиск по предвычисленной строке: name + shortName + раздел + описание + теги,
-// уже в нижнем регистре (собирается генератором индекса). Раньше эта строка
-// пересобиралась для каждого калькулятора на каждое нажатие клавиши.
+// Ранжированный поиск: совпадение в названии весит больше, чем в описании/тегах,
+// и запрос латиницей («skf») находит кириллические названия («СКФ») благодаря
+// транслитерации, вшитой в индекс при сборке (см. lib/search.js). Сами поля
+// поиска предвычислены генератором — здесь на каждое нажатие клавиши идёт
+// только сравнение строк, без пересборки текста.
 export function searchCalculators(query) {
-  const q = query.trim().toLowerCase();
-  if (!q) return [];
-  const parts = q.split(/\s+/);
-  return catalog.filter((c) => parts.every((p) => c.search.includes(p)));
+  return rankBySearch(catalog, query);
 }
 
 // --- загрузка тел ---
