@@ -5,7 +5,9 @@
 const FAV = 'medcalc.favorites';
 const REC = 'medcalc.recents';
 const DISCLAIMER = 'medcalc.disclaimerAccepted';
+const INSTALL_SNOOZE = 'medcalc.installSnoozedUntil';
 const RECENTS_LIMIT = 8;
+const INSTALL_SNOOZE_DAYS = 30;
 
 function read(key, fallback) {
   try {
@@ -57,4 +59,20 @@ export function isDisclaimerAccepted() {
 
 export function acceptDisclaimer() {
   write(DISCLAIMER, true);
+}
+
+// Баннер установки закрывается не навсегда, а откладывается: раньше стоял
+// вечный флаг, и закрывший его один раз больше никогда не видел предложения.
+export function snoozeInstallBanner() {
+  write(INSTALL_SNOOZE, Date.now() + INSTALL_SNOOZE_DAYS * 24 * 60 * 60 * 1000);
+}
+
+export function isInstallBannerSnoozed() {
+  const until = read(INSTALL_SNOOZE, 0);
+  return typeof until === 'number' && Date.now() < until;
+}
+
+/** Сколько разных калькуляторов человек уже открывал — триггер для баннера. */
+export function distinctCalculatorsOpened() {
+  return getRecents().length;
 }

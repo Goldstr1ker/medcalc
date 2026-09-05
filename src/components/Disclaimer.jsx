@@ -1,12 +1,10 @@
-import { useState } from 'react';
-import { isDisclaimerAccepted, acceptDisclaimer } from '../lib/storage.js';
-
-// Однократный экран-предупреждение при первом запуске.
-export default function Disclaimer({ children }) {
-  const [accepted, setAccepted] = useState(() => isDisclaimerAccepted());
-
-  if (accepted) return children;
-
+// Экран-предупреждение при первом запуске.
+//
+// Раньше этот компонент был обёрткой и до принятия возвращал заглушку вместо
+// children — из-за чего всё содержимое приложения (включая баннер установки)
+// на первом визите вообще не монтировалось. Теперь это просто экран,
+// а решение «показывать его или нет» принимает App.
+export default function Disclaimer({ onAccept }) {
   return (
     <div className="gate">
       <div className="gate__card">
@@ -21,13 +19,7 @@ export default function Disclaimer({ children }) {
           <li>Решения о диагностике и лечении принимает лечащий врач с учётом полной картины.</li>
           <li>Данные пациента остаются в браузере и никуда не отправляются.</li>
         </ul>
-        <button
-          className="btn-primary"
-          onClick={() => {
-            acceptDisclaimer();
-            setAccepted(true);
-          }}
-        >
+        <button className="btn-primary" onClick={onAccept}>
           Понятно, продолжить
         </button>
       </div>

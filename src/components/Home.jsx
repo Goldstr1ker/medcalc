@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { calculators, systems, searchCalculators, getCalculator } from '../registry.js';
 import { getFavorites, getRecents } from '../lib/storage.js';
+import InstallSection from './InstallSection.jsx';
 
 export default function Home({ onOpen, onOpenSystem }) {
   const [query, setQuery] = useState('');
@@ -64,6 +65,8 @@ export default function Home({ onOpen, onOpenSystem }) {
             <h2 className="section-title">Все калькуляторы</h2>
             <CalcList items={calculators} onOpen={onOpen} />
           </section>
+
+          <InstallSection />
         </>
       )}
     </div>

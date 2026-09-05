@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getCalculator, getBySystem } from './registry.js';
+import { acceptDisclaimer, isDisclaimerAccepted } from './lib/storage.js';
 import Home, { CalcList } from './components/Home.jsx';
 import CalculatorView from './components/CalculatorView.jsx';
 import Disclaimer from './components/Disclaimer.jsx';
-import InstallHint from './components/InstallHint.jsx';
+import InstallBanner from './components/InstallBanner.jsx';
 
 // Простейший роутер на hash: #/  #/system/<раздел>  #/calc/<id>
 function parseHash(hash) {
@@ -28,33 +29,44 @@ function useRoute() {
 
 export default function App() {
   const route = useRoute();
+  const [accepted, setAccepted] = useState(() => isDisclaimerAccepted());
+
   const go = useCallback((hash) => {
     window.location.hash = hash;
   }, []);
 
+  if (!accepted) {
+    return (
+      <Disclaimer
+        onAccept={() => {
+          acceptDisclaimer();
+          setAccepted(true);
+        }}
+      />
+    );
+  }
+
   return (
-    <Disclaimer>
-      <div className="app">
-        {route.name === 'home' && (
-          <Home
-            onOpen={(id) => go(`#/calc/${id}`)}
-            onOpenSystem={(system) => go(`#/system/${encodeURIComponent(system)}`)}
-          />
-        )}
+    <div className="app">
+      {route.name === 'home' && (
+        <Home
+          onOpen={(id) => go(`#/calc/${id}`)}
+          onOpenSystem={(system) => go(`#/system/${encodeURIComponent(system)}`)}
+        />
+      )}
 
-        {route.name === 'system' && (
-          <SystemView
-            system={route.system}
-            onOpen={(id) => go(`#/calc/${id}`)}
-            onBack={() => go('#/')}
-          />
-        )}
+      {route.name === 'system' && (
+        <SystemView
+          system={route.system}
+          onOpen={(id) => go(`#/calc/${id}`)}
+          onBack={() => go('#/')}
+        />
+      )}
 
-        {route.name === 'calc' && <CalcRoute id={route.id} onBack={() => go('#/')} />}
+      {route.name === 'calc' && <CalcRoute id={route.id} onBack={() => go('#/')} />}
 
-        <InstallHint />
-      </div>
-    </Disclaimer>
+      <InstallBanner />
+    </div>
   );
 }
 
