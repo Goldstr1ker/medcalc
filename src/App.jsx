@@ -5,6 +5,7 @@ import Home, { CalcList } from './components/Home.jsx';
 import CalculatorView from './components/CalculatorView.jsx';
 import Disclaimer from './components/Disclaimer.jsx';
 import InstallBanner from './components/InstallBanner.jsx';
+import CalculatorErrorBoundary from './components/CalculatorErrorBoundary.jsx';
 
 // Простейший роутер на hash: #/  #/system/<раздел>  #/calc/<id>
 function parseHash(hash) {
@@ -75,7 +76,13 @@ export default function App() {
           />
         )}
 
-        {route.name === 'calc' && <CalcRoute id={route.id} onBack={() => go('#/')} />}
+        {/* key={route.id} — граница пересоздаётся при переходе на другой
+            калькулятор, поэтому сброс ошибки не нужен отдельным кодом. */}
+        {route.name === 'calc' && (
+          <CalculatorErrorBoundary key={route.id} id={route.id} onBack={() => go('#/')}>
+            <CalcRoute id={route.id} onBack={() => go('#/')} />
+          </CalculatorErrorBoundary>
+        )}
       </main>
 
       <InstallBanner />

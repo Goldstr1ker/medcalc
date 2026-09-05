@@ -105,6 +105,7 @@ const ITEMS = [
   },
 ];
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'nihss',
   name: 'NIHSS — шкала тяжести инсульта',

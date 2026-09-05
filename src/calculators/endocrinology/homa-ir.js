@@ -3,6 +3,7 @@
 import { SYSTEMS } from '../../lib/systems.js';
 import { GLUCOSE_MMOL } from '../../lib/units.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'homa-ir',
   name: 'HOMA-IR — индекс инсулинорезистентности',

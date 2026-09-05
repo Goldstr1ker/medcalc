@@ -20,6 +20,7 @@ const THROMBOSIS = [
 ];
 const OTHER_CAUSES = ['Явная другая причина есть', 'Возможна другая причина', 'Явной другой причины нет'];
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'four-ts',
   name: '4T — вероятность гепарин-индуцированной тромбоцитопении',
@@ -37,6 +38,7 @@ export default {
   ],
 
   calculate({ thrombocytopenia, timing, thrombosis, otherCauses }) {
+    /** @type {[string, number][]} */
     const parts = [
       ['Тромбоцитопения', THROMBOCYTOPENIA.indexOf(thrombocytopenia)],
       ['Сроки', TIMING.indexOf(timing)],

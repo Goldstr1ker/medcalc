@@ -3,6 +3,7 @@
 
 import { SYSTEMS } from '../../lib/systems.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'qtc',
   name: 'QTc — корригированный интервал QT',

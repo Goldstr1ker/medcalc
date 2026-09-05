@@ -38,7 +38,9 @@ export function resolveBands(spec, inputs) {
 // на каждый рендер калькулятора, а диапазонов всего несколько — сортировать
 // их заново каждый раз было чистой тратой.
 export function resolveBand(value, bands) {
+  /** @type {import('./types.js').Band | null} */
   let match = null;
+  /** @type {import('./types.js').Band | null} */
   let lowest = null;
   for (const b of bands) {
     if (lowest === null || b.min < lowest.min) lowest = b;

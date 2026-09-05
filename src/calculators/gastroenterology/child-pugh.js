@@ -6,6 +6,7 @@ const ENCEPHALOPATHY = ['Нет', 'I–II степень', 'III–IV степе�
 import { SYSTEMS } from '../../lib/systems.js';
 import { ALBUMIN_GL, BILIRUBIN_UMOL } from '../../lib/units.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'child-pugh',
   name: 'Класс тяжести цирроза по Чайлд-Пью',

@@ -23,6 +23,12 @@ const INPUT_TYPES = new Set(['number', 'select', 'boolean']);
 const RESULT_TYPES = new Set(['gauge', 'score', 'value']);
 const COLORS = new Set(['green', 'lime', 'yellow', 'orange', 'red', 'darkred', 'slate']);
 
+// Допустимые ключи в том, что возвращает calculate(). Должны совпадать
+// с CalcResult / DetailRow / BreakdownRow в src/lib/types.d.ts.
+const RESULT_KEYS = new Set(['value', 'unit', 'decimals', 'breakdown', 'details']);
+const DETAIL_KEYS = new Set(['label', 'value', 'unit', 'decimals', 'color']);
+const BREAKDOWN_KEYS = new Set(['label', 'points']);
+
 const loaded = await loadCalculators();
 const seenIds = new Map();
 
@@ -213,11 +219,38 @@ for (const { file, calc } of loaded) {
       const values = { ...initialValues(calc.inputs), ...(ex.inputs ?? {}) };
       const unitChoice = { ...initialUnits(calc.inputs), ...(ex.units ?? {}) };
       const produced = calc.calculate(toCanonical(calc.inputs, values, unitChoice));
+
+      // Лишние ключи в возврате calculate() — это почти всегда опечатка
+      // (`decimal` вместо `decimals`), и она ТИХАЯ: значение просто покажется
+      // с округлением по умолчанию. Типы такое не ловят: TS не проверяет
+      // лишние поля в return метода, типизированного контекстно, — поэтому
+      // проверка здесь.
+      for (const key of Object.keys(produced ?? {})) {
+        if (!RESULT_KEYS.has(key)) {
+          err(file, `${where}: calculate() вернул неизвестное поле "${key}" — опечатка?`);
+        }
+      }
       for (const [j, d] of (produced?.details ?? []).entries()) {
         if (!d.label) err(file, `${where}: details[${j}] без label`);
         if (!Number.isFinite(d.value)) err(file, `${where}: details[${j}] value не число`);
         if (d.color && !COLORS.has(d.color)) {
           err(file, `${where}: details[${j}] неизвестный цвет "${d.color}"`);
+        }
+        for (const key of Object.keys(d)) {
+          if (!DETAIL_KEYS.has(key)) {
+            err(file, `${where}: details[${j}] — неизвестное поле "${key}"`);
+          }
+        }
+      }
+      for (const [j, row] of (produced?.breakdown ?? []).entries()) {
+        if (!row.label) err(file, `${where}: breakdown[${j}] без label`);
+        if (!Number.isFinite(row.points)) {
+          err(file, `${where}: breakdown[${j}] points не число`);
+        }
+        for (const key of Object.keys(row)) {
+          if (!BREAKDOWN_KEYS.has(key)) {
+            err(file, `${where}: breakdown[${j}] — неизвестное поле "${key}"`);
+          }
         }
       }
     } catch (e) {

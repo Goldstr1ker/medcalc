@@ -17,6 +17,7 @@ const GRIMACE = [
 const ACTIVITY = ['Вялый, движений нет', 'Некоторое сгибание конечностей', 'Активные движения'];
 const RESPIRATION = ['Отсутствует', 'Слабое, нерегулярное дыхание', 'Хороший крик, регулярное дыхание'];
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'apgar',
   name: 'Шкала Апгар',
@@ -35,6 +36,7 @@ export default {
   ],
 
   calculate({ appearance, pulse, grimace, activity, respiration }) {
+    /** @type {[string, number][]} */
     const parts = [
       ['Окраска кожи', APPEARANCE.indexOf(appearance)],
       ['ЧСС', PULSE.indexOf(pulse)],

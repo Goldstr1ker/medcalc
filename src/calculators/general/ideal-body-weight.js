@@ -4,6 +4,7 @@ import { SYSTEMS } from '../../lib/systems.js';
 
 const CM_PER_INCH = 2.54;
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'ideal-body-weight',
   name: 'Идеальная и скорректированная масса тела',

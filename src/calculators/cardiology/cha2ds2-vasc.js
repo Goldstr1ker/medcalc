@@ -5,6 +5,7 @@
 
 import { SYSTEMS } from '../../lib/systems.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'cha2ds2-vasc',
   name: 'CHA₂DS₂-VASc',

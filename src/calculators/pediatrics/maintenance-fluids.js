@@ -3,6 +3,7 @@
 
 import { SYSTEMS } from '../../lib/systems.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'maintenance-fluids',
   name: 'Поддерживающая инфузия у детей (правило 4-2-1)',

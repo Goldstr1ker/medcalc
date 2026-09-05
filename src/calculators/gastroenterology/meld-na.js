@@ -8,6 +8,7 @@
 import { SYSTEMS } from '../../lib/systems.js';
 import { BILIRUBIN_MGDL, CREATININE_MGDL } from '../../lib/units.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'meld-na',
   name: 'MELD-Na',

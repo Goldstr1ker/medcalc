@@ -13,6 +13,7 @@ const MOTOR = [
 
 import { SYSTEMS } from '../../lib/systems.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'gcs',
   name: 'Шкала комы Глазго (ШКГ)',

@@ -2,6 +2,7 @@
 
 import { SYSTEMS } from '../../lib/systems.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'wells-dvt',
   name: 'Шкала Уэллса для ТГВ',

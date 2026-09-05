@@ -62,7 +62,7 @@ export function isReady(inputs, values) {
  * а не абстрактные «0,5 мл/кг/ч».
  *
  * @param value строка/объект или функция (ctx) => то же самое
- * @param ctx   { result, band, inputs }
+ * @param ctx   контекст с полями result, band, inputs
  */
 export function resolveText(value, ctx) {
   return typeof value === 'function' ? value(ctx) : value;
@@ -82,6 +82,10 @@ export function compute(calc, values, units) {
     const bands = resolveBands(calc.result, inputs);
     return { result, band: resolveBand(result.value, bands), bands, inputs };
   } catch (e) {
-    return { result: { error: String(e?.message || e) }, band: null, bands: [], inputs: null };
+    // В консоль пишем всегда: наружу уходит только текст сообщения, а понять,
+    // где именно упала формула, можно лишь по стеку.
+    console.error('Ошибка в calculate() калькулятора', calc?.id, e);
+    const error = e instanceof Error ? e.message : String(e);
+    return { result: { error }, band: null, bands: [], inputs: null };
   }
 }

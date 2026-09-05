@@ -4,6 +4,7 @@
 import { SYSTEMS } from '../../lib/systems.js';
 import { ALBUMIN_GL } from '../../lib/units.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'corrected-calcium',
   name: 'Скорректированный кальций (по альбумину)',

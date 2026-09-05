@@ -5,6 +5,7 @@
 import { SYSTEMS } from '../../lib/systems.js';
 import { GLUCOSE_MMOL } from '../../lib/units.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'corrected-sodium',
   name: 'Скорректированный натрий при гипергликемии',

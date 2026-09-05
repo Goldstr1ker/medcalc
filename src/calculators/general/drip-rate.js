@@ -11,6 +11,7 @@ const DROP_FACTORS = {
 };
 const DROP_FACTOR_OPTIONS = Object.keys(DROP_FACTORS);
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'drip-rate',
   name: 'Скорость инфузии в каплях в минуту',

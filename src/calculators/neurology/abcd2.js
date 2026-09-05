@@ -9,6 +9,7 @@ const CLINICAL = [
 ];
 const DURATION = ['< 10 минут', '10–59 минут', '≥ 60 минут'];
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'abcd2',
   name: 'ABCD2 — риск инсульта после ТИА',

@@ -7,6 +7,7 @@
 import { SYSTEMS } from '../../lib/systems.js';
 import { CREATININE_MGDL } from '../../lib/units.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'ckd-epi-2021',
   name: 'СКФ по CKD-EPI (2021)',

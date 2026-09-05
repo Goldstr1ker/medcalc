@@ -512,6 +512,20 @@ h2 {
   white-space: nowrap;
 }
 
+/* Стек сломавшегося калькулятора — рисуется только в дев-сборке
+   (см. CalculatorErrorBoundary). */
+.error-detail {
+  margin: 0;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
 /* ---------- Текстовые блоки ---------- */
 
 .interp {

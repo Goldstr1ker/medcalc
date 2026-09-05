@@ -2,6 +2,7 @@
 
 import { SYSTEMS } from '../../lib/systems.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'anion-gap',
   name: 'Анионная разница',

@@ -7,6 +7,7 @@
 import { SYSTEMS } from '../../lib/systems.js';
 import { CREATININE_MGDL } from '../../lib/units.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'cockcroft-gault',
   name: 'Клиренс креатинина (Кокрофт–Голт)',

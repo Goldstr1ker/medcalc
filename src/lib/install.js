@@ -6,6 +6,7 @@
 // теряется навсегда (повторно браузер его не бросает). Поэтому initInstallCapture()
 // вызывается в main.jsx ДО рендера, а компоненты уже читают готовое состояние.
 
+/** @type {BeforeInstallPromptEvent | null} */
 let deferredPrompt = null;
 let installed = false;
 let version = 0; // счётчик изменений, чтобы React знал о новом состоянии

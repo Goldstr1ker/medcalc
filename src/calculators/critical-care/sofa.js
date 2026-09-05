@@ -16,8 +16,10 @@ const VASOPRESSORS = [
 ];
 
 // Цвет подшкалы по числу баллов — чтобы сразу видеть, какая система тянет вниз.
+/** @type {import('../../lib/types.js').BandColor[]} */
 const SUBSCORE_COLORS = ['green', 'lime', 'yellow', 'orange', 'red'];
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'sofa',
   name: 'SOFA — оценка органной дисфункции',
@@ -131,6 +133,7 @@ export default {
     if (creatinine >= 300) renal = 3;
     if (creatinine >= 441) renal = 4;
 
+    /** @type {[string, number][]} */
     const parts = [
       ['Дыхание', resp],
       ['Коагуляция', coag],

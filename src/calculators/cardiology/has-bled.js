@@ -5,6 +5,7 @@
 
 import { SYSTEMS } from '../../lib/systems.js';
 
+/** @type {import('../../lib/types.js').Calculator} */
 export default {
   id: 'has-bled',
   name: 'HAS-BLED',
