@@ -123,6 +123,16 @@ export default {
       inputs: { bilirubin: 100, creatinine: 200, inr: 2.0, sodium: 110, dialysis: true },
       expect: { value: 36, details: [34] },
     },
+    {
+      note: 'Билирубин 100, креатинин 150, МНО 1,8, натрий в норме — порог обсуждения трансплантации',
+      inputs: { bilirubin: 100, creatinine: 150, inr: 1.8, sodium: 137 },
+      expect: { value: 25, band: 'b3', details: [25] },
+    },
+    {
+      note: 'Предельная тяжесть: MELD упирается в потолок 40, поправка на натрий его не меняет',
+      inputs: { bilirubin: 500, creatinine: 400, inr: 3.0, sodium: 125, dialysis: true },
+      expect: { value: 40, band: 'b5', details: [40] },
+    },
   ],
 
   references: [

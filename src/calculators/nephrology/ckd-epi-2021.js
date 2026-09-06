@@ -137,6 +137,21 @@ export default {
       expect: { value: 117, band: 'C1' },
     },
     {
+      note: 'Мужчина 50 лет, креатинин 110 мкмоль/л — стадия С2',
+      inputs: { sex: 'Мужской', age: 50, scr: 110 },
+      expect: { value: 71, band: 'C2' },
+    },
+    {
+      note: 'Мужчина 65 лет, креатинин 130 мкмоль/л — стадия С3а',
+      inputs: { sex: 'Мужской', age: 65, scr: 130 },
+      expect: { value: 53, band: 'C3a' },
+    },
+    {
+      note: 'Женщина 70 лет, креатинин 250 мкмоль/л — стадия С4',
+      inputs: { sex: 'Женский', age: 70, scr: 250 },
+      expect: { value: 17, band: 'C4' },
+    },
+    {
       note: 'Тот же креатинин в мг/дл даёт тот же результат',
       inputs: { sex: 'Мужской', age: 60, scr: 2.0362 },
       units: { scr: 'mgdl' },

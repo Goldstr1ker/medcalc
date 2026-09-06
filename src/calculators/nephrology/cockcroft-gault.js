@@ -103,6 +103,16 @@ export default {
       inputs: { sex: 'Мужской', age: 25, weight: 80, scr: 80 },
       expect: { value: 141, band: 'normal' },
     },
+    {
+      note: 'Мужчина 70 лет, 75 кг, креатинин 150 мкмоль/л — порог коррекции доз',
+      inputs: { sex: 'Мужской', age: 70, weight: 75, scr: 150 },
+      expect: { value: 43, band: 'moderate' },
+    },
+    {
+      note: 'Женщина 80 лет, 50 кг, креатинин 500 мкмоль/л — резкое снижение',
+      inputs: { sex: 'Женский', age: 80, weight: 50, scr: 500 },
+      expect: { value: 6, band: 'failure' },
+    },
   ],
 
   references: [

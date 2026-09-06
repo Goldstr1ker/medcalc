@@ -283,6 +283,32 @@ export default {
       expect: { value: 24, band: 'critical', details: [4, 4, 4, 4, 4, 4] },
     },
     {
+      note: 'Умеренная дисфункция: дыхание 2 + коагуляция 1 + печень 1 + АД 1 + ЦНС 1 + почки 2 = 8',
+      inputs: {
+        pafi: 250,
+        platelets: 120,
+        bilirubin: 25,
+        map: 65,
+        gcs: 14,
+        creatinine: 200,
+      },
+      expect: { value: 8, band: 'moderate' },
+    },
+    {
+      note: 'Тяжёлая полиорганная: дыхание 3 (на ИВЛ) + 2 + 2 + 2 (добутамин) + 2 + 2 = 13',
+      inputs: {
+        pafi: 150,
+        respSupport: true,
+        platelets: 80,
+        bilirubin: 50,
+        map: 75,
+        vasopressor: 'Добутамин (любая доза) или допамин ≤ 5',
+        gcs: 11,
+        creatinine: 200,
+      },
+      expect: { value: 13, band: 'veryHigh' },
+    },
+    {
       note: 'Промежуточный случай: по 2 балла за четыре системы',
       inputs: {
         pafi: 250,

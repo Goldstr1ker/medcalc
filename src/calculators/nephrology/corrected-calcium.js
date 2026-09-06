@@ -106,6 +106,16 @@ export default {
       expect: { value: 2.1, band: 'low' },
     },
     {
+      note: 'Ca 1,7 при нормальном альбумине — тяжёлая гипокальциемия',
+      inputs: { calcium: 1.7, albumin: 40 },
+      expect: { value: 1.7, band: 'severe_low' },
+    },
+    {
+      note: 'Ca 2,7 при нормальном альбумине — гиперкальциемия',
+      inputs: { calcium: 2.7, albumin: 40 },
+      expect: { value: 2.7, band: 'high' },
+    },
+    {
       note: 'Ca 2,9 при альбумине 35 г/л — выраженная гиперкальциемия',
       inputs: { calcium: 2.9, albumin: 35 },
       expect: { value: 3.0, band: 'severe_high' },

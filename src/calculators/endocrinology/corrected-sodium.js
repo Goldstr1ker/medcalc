@@ -105,6 +105,26 @@ export default {
       units: { glucose: 'mgdl' },
       expect: { value: 138, band: 'normal' },
     },
+    {
+      note: 'Na 128 при глюкозе 20 — после поправки лёгкая гипонатриемия, а не умеренная',
+      inputs: { sodium: 128, glucose: 20 },
+      expect: { value: 132.2, band: 'mildLow', details: [134.2] },
+    },
+    {
+      note: 'Na 120 при глюкозе 25 — поправка не выводит из умеренной гипонатриемии',
+      inputs: { sodium: 120, glucose: 25 },
+      expect: { value: 125.6, band: 'moderateLow', details: [128.4] },
+    },
+    {
+      note: 'Na 112 при глюкозе 12 — тяжёлая гипонатриемия, гипергликемия её не объясняет',
+      inputs: { sodium: 112, glucose: 12 },
+      expect: { value: 113.9, band: 'severeLow', details: [114.8] },
+    },
+    {
+      note: 'Гиперосмолярное состояние: Na 150 при глюкозе 30 — истинная гипернатриемия ещё выше',
+      inputs: { sodium: 150, glucose: 30 },
+      expect: { value: 157, band: 'high', details: [160.6] },
+    },
   ],
 
   references: [

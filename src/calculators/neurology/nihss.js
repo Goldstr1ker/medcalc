@@ -223,6 +223,21 @@ export default {
       expect: { value: 14, band: 'moderate' },
     },
     {
+      note: 'Правополушарный инсульт: плегия левой руки, гемианопсия, неглект — 18 баллов',
+      inputs: {
+        locQuestions: 'Один ответ верен',
+        gaze: 'Частичный парез взора',
+        visual: 'Полная гемианопсия',
+        facial: 'Частичный (нижняя половина лица)',
+        armLeft: 'Нет активных движений',
+        legLeft: 'Нет усилия против гравитации',
+        sensory: 'Тяжёлая утрата или отсутствие',
+        dysarthria: 'Лёгкая или умеренная',
+        neglect: 'По двум модальностям',
+      },
+      expect: { value: 18, band: 'moderateSevere' },
+    },
+    {
       note: 'Максимальный балл по всем пунктам — 42',
       inputs: Object.fromEntries(
         ITEMS.map((i) => [i.id, i.options[i.options.length - 1]]),

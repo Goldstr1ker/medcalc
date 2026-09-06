@@ -110,6 +110,17 @@ export default {
       expect: { value: 3, band: 'low' },
     },
     {
+      note: 'Гипертоник 65 лет, речевые нарушения 30 минут: 1 (возраст) + 1 (АД) + 1 (речь) + 1 (длительность) = 4',
+      inputs: {
+        age: 65,
+        sbp: 150,
+        dbp: 85,
+        clinical: 'Нарушение речи без слабости',
+        duration: '10–59 минут',
+      },
+      expect: { value: 4, band: 'moderate' },
+    },
+    {
       note: 'Максимум по всем критериям — 7 баллов',
       inputs: { age: 70, sbp: 160, dbp: 100, clinical: CLINICAL[2], duration: DURATION[2], diabetes: true },
       expect: { value: 7, band: 'high' },

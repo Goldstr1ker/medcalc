@@ -89,9 +89,24 @@ export default {
       expect: { value: 22.9, band: 'normal' },
     },
     {
+      note: '80 кг при росте 170 см — избыточная масса тела',
+      inputs: { weight: 80, height: 170 },
+      expect: { value: 27.7, band: 'over' },
+    },
+    {
       note: '100 кг при росте 170 см — ожирение I степени',
       inputs: { weight: 100, height: 170 },
       expect: { value: 34.6, band: 'ob1' },
+    },
+    {
+      note: '110 кг при росте 175 см — ожирение II степени',
+      inputs: { weight: 110, height: 175 },
+      expect: { value: 35.9, band: 'ob2' },
+    },
+    {
+      note: '130 кг при росте 170 см — ожирение III степени (морбидное)',
+      inputs: { weight: 130, height: 170 },
+      expect: { value: 45, band: 'ob3' },
     },
     {
       note: '50 кг при росте 175 см — дефицит массы тела',
