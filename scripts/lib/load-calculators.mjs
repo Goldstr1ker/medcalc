@@ -13,8 +13,13 @@ const HERE = fileURLToPath(new URL('.', import.meta.url));
 export const REPO_ROOT = resolve(HERE, '../..');
 const CALC_DIR = join(REPO_ROOT, 'src/calculators');
 
+// Файлы и папки с префиксом `_` — общие хелперы для калькуляторов
+// (напр. `src/calculators/_shared/scores.js`). Они не экспортируют калькулятор
+// и в обход не попадают. Та же оговорка — в import.meta.glob внутри registry.js
+// и в pattern сборщика индекса, все три должны совпадать.
 function walk(dir) {
   return readdirSync(dir).flatMap((entry) => {
+    if (entry.startsWith('_')) return [];
     const p = join(dir, entry);
     return statSync(p).isDirectory() ? walk(p) : p.endsWith('.js') ? [p] : [];
   });

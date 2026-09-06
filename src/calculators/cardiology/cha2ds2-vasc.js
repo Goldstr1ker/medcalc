@@ -4,6 +4,7 @@
 // Инсульт/ТИА/ТЭ 2 · Сосудистое заболевание 1 · Возраст 65–74 → 1 · Женский пол 1.
 
 import { SYSTEMS } from '../../lib/systems.js';
+import { tally } from '../_shared/scoring.js';
 
 /** @type {import('../../lib/types.js').Calculator} */
 export default {
@@ -27,23 +28,16 @@ export default {
 
   calculate({ age, sex, chf, htn, dm, stroke, vascular }) {
     const female = sex === 'Женский';
-    const breakdown = [];
-    let score = 0;
-    const add = (cond, label, pts) => {
-      if (cond) {
-        score += pts;
-        breakdown.push({ label, points: pts });
-      }
-    };
-    add(chf, 'ХСН / дисфункция ЛЖ', 1);
-    add(htn, 'Артериальная гипертензия', 1);
-    add(age >= 75, 'Возраст ≥ 75 лет', 2);
-    add(age >= 65 && age < 75, 'Возраст 65–74 года', 1);
-    add(dm, 'Сахарный диабет', 1);
-    add(stroke, 'Инсульт / ТИА / ТЭ в анамнезе', 2);
-    add(vascular, 'Сосудистое заболевание', 1);
-    add(female, 'Женский пол', 1);
-    return { value: score, decimals: 0, breakdown };
+    return tally([
+      [chf, 'ХСН / дисфункция ЛЖ'],
+      [htn, 'Артериальная гипертензия'],
+      [age >= 75, 'Возраст ≥ 75 лет', 2],
+      [age >= 65 && age < 75, 'Возраст 65–74 года'],
+      [dm, 'Сахарный диабет'],
+      [stroke, 'Инсульт / ТИА / ТЭ в анамнезе', 2],
+      [vascular, 'Сосудистое заболевание'],
+      [female, 'Женский пол'],
+    ]);
   },
 
   result: {

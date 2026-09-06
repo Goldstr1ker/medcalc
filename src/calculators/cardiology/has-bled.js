@@ -4,6 +4,7 @@
 // приём антиагрегантов/НПВП, злоупотребление алкоголем. Максимум 9.
 
 import { SYSTEMS } from '../../lib/systems.js';
+import { tally } from '../_shared/scoring.js';
 
 /** @type {import('../../lib/types.js').Calculator} */
 export default {
@@ -28,24 +29,17 @@ export default {
   ],
 
   calculate({ age, htn, renal, hepatic, stroke, bleeding, labileInr, drugs, alcohol }) {
-    const breakdown = [];
-    let score = 0;
-    const add = (cond, label) => {
-      if (cond) {
-        score += 1;
-        breakdown.push({ label, points: 1 });
-      }
-    };
-    add(htn, 'Артериальная гипертензия');
-    add(renal, 'Нарушение функции почек');
-    add(hepatic, 'Нарушение функции печени');
-    add(stroke, 'Инсульт в анамнезе');
-    add(bleeding, 'Кровотечение в анамнезе/предрасположенность');
-    add(labileInr, 'Лабильное МНО');
-    add(age >= 65, 'Возраст ≥ 65 лет');
-    add(drugs, 'Антиагреганты/НПВП');
-    add(alcohol, 'Злоупотребление алкоголем');
-    return { value: score, decimals: 0, breakdown };
+    return tally([
+      [htn, 'Артериальная гипертензия'],
+      [renal, 'Нарушение функции почек'],
+      [hepatic, 'Нарушение функции печени'],
+      [stroke, 'Инсульт в анамнезе'],
+      [bleeding, 'Кровотечение в анамнезе/предрасположенность'],
+      [labileInr, 'Лабильное МНО'],
+      [age >= 65, 'Возраст ≥ 65 лет'],
+      [drugs, 'Антиагреганты/НПВП'],
+      [alcohol, 'Злоупотребление алкоголем'],
+    ]);
   },
 
   result: {

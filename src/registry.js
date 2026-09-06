@@ -17,7 +17,14 @@ import { catalog } from './catalog.generated.js';
 import { systemOrderIndex } from './lib/systems.js';
 import { rankBySearch } from './lib/search.js';
 
-const loaders = import.meta.glob('./calculators/**/*.js');
+// Префикс `_` — общие хелперы (напр. ./calculators/_shared/scores.js),
+// они не экспортируют калькулятор. Та же оговорка — в walk() внутри
+// scripts/lib/load-calculators.mjs, обе должны совпадать.
+const loaders = import.meta.glob([
+  './calculators/**/*.js',
+  '!./calculators/**/_*',
+  '!./calculators/**/_*/**',
+]);
 
 /** Метаданные всех калькуляторов (без тел). Отсортированы по названию. */
 export const calculators = catalog;

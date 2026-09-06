@@ -1,6 +1,7 @@
 // Шкала Уэллса для тромбоза глубоких вен (дихотомизированная версия).
 
 import { SYSTEMS } from '../../lib/systems.js';
+import { tally } from '../_shared/scoring.js';
 
 /** @type {import('../../lib/types.js').Calculator} */
 export default {
@@ -37,25 +38,18 @@ export default {
     priorDvt,
     alternativeDiagnosis,
   }) {
-    const breakdown = [];
-    let score = 0;
-    const add = (cond, label, points) => {
-      if (cond) {
-        score += points;
-        breakdown.push({ label, points });
-      }
-    };
-    add(cancer, 'Активное онкозаболевание', 1);
-    add(paralysis, 'Парез/паралич/иммобилизация', 1);
-    add(bedridden, 'Постельный режим/недавняя операция', 1);
-    add(tenderness, 'Локальная болезненность по ходу вен', 1);
-    add(legSwollen, 'Отёк всей ноги', 1);
-    add(calfSwelling, 'Отёк голени > 3 см', 1);
-    add(pittingEdema, 'Отёк с ямкой на стороне поражения', 1);
-    add(collateralVeins, 'Коллатеральные поверхностные вены', 1);
-    add(priorDvt, 'ТГВ в анамнезе', 1);
-    add(alternativeDiagnosis, 'Альтернативный диагноз не менее вероятен', -2);
-    return { value: score, decimals: 0, breakdown };
+    return tally([
+      [cancer, 'Активное онкозаболевание'],
+      [paralysis, 'Парез/паралич/иммобилизация'],
+      [bedridden, 'Постельный режим/недавняя операция'],
+      [tenderness, 'Локальная болезненность по ходу вен'],
+      [legSwollen, 'Отёк всей ноги'],
+      [calfSwelling, 'Отёк голени > 3 см'],
+      [pittingEdema, 'Отёк с ямкой на стороне поражения'],
+      [collateralVeins, 'Коллатеральные поверхностные вены'],
+      [priorDvt, 'ТГВ в анамнезе'],
+      [alternativeDiagnosis, 'Альтернативный диагноз не менее вероятен', -2],
+    ]);
   },
 
   result: {

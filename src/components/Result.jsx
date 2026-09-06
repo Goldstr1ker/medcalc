@@ -120,7 +120,12 @@ function Score({ spec, bands, result, band }) {
           {result.breakdown.map((row, i) => (
             <li key={i}>
               <span>{row.label}</span>
-              <b>+{fmtNumber(row.points, Number.isInteger(row.points) ? 0 : 1)}</b>
+              {/* Знак «+» только у положительных: у шкалы Уэллса для ТГВ
+                  «альтернативный диагноз» даёт −2, и «+−2» читалось плохо. */}
+              <b>
+                {row.points > 0 ? '+' : ''}
+                {fmtNumber(row.points, Number.isInteger(row.points) ? 0 : 1)}
+              </b>
             </li>
           ))}
         </ul>

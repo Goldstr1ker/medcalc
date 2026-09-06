@@ -1,6 +1,7 @@
 // Шкала Падуа — риск венозной тромбоэмболии у нехирургических госпитализированных пациентов.
 
 import { SYSTEMS } from '../../lib/systems.js';
+import { tally } from '../_shared/scoring.js';
 
 /** @type {import('../../lib/types.js').Calculator} */
 export default {
@@ -39,26 +40,19 @@ export default {
     obesity,
     hormonal,
   }) {
-    const breakdown = [];
-    let score = 0;
-    const add = (cond, label, points) => {
-      if (cond) {
-        score += points;
-        breakdown.push({ label, points });
-      }
-    };
-    add(cancer, 'Активное онкозаболевание', 3);
-    add(priorVte, 'ВТЭ в анамнезе', 3);
-    add(immobility, 'Сниженная подвижность', 3);
-    add(thrombophilia, 'Известная тромбофилия', 3);
-    add(recentTraumaSurgery, 'Травма или операция за последний месяц', 2);
-    add(age >= 70, 'Возраст ≥ 70 лет', 1);
-    add(heartRespFailure, 'Сердечная/дыхательная недостаточность', 1);
-    add(acuteMiStroke, 'Острый ИМ или ишемический инсульт', 1);
-    add(acuteInfection, 'Острая инфекция/ревматологическое заболевание', 1);
-    add(obesity, 'Ожирение (ИМТ ≥ 30)', 1);
-    add(hormonal, 'Гормональная терапия', 1);
-    return { value: score, decimals: 0, breakdown };
+    return tally([
+      [cancer, 'Активное онкозаболевание', 3],
+      [priorVte, 'ВТЭ в анамнезе', 3],
+      [immobility, 'Сниженная подвижность', 3],
+      [thrombophilia, 'Известная тромбофилия', 3],
+      [recentTraumaSurgery, 'Травма или операция за последний месяц', 2],
+      [age >= 70, 'Возраст ≥ 70 лет'],
+      [heartRespFailure, 'Сердечная/дыхательная недостаточность'],
+      [acuteMiStroke, 'Острый ИМ или ишемический инсульт'],
+      [acuteInfection, 'Острая инфекция/ревматологическое заболевание'],
+      [obesity, 'Ожирение (ИМТ ≥ 30)'],
+      [hormonal, 'Гормональная терапия'],
+    ]);
   },
 
   result: {

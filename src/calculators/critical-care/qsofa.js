@@ -2,6 +2,7 @@
 // у пациента с подозрением на инфекцию. По 1 баллу за каждый признак.
 
 import { SYSTEMS } from '../../lib/systems.js';
+import { tally } from '../_shared/scoring.js';
 
 /** @type {import('../../lib/types.js').Calculator} */
 export default {
@@ -20,18 +21,11 @@ export default {
   ],
 
   calculate({ rr, ams, sbp }) {
-    const breakdown = [];
-    let score = 0;
-    const add = (cond, label) => {
-      if (cond) {
-        score += 1;
-        breakdown.push({ label, points: 1 });
-      }
-    };
-    add(rr, 'ЧДД ≥ 22/мин');
-    add(ams, 'Изменённое сознание (ШКГ < 15)');
-    add(sbp, 'САД ≤ 100 мм рт. ст.');
-    return { value: score, decimals: 0, breakdown };
+    return tally([
+      [rr, 'ЧДД ≥ 22/мин'],
+      [ams, 'Изменённое сознание (ШКГ < 15)'],
+      [sbp, 'САД ≤ 100 мм рт. ст.'],
+    ]);
   },
 
   result: {

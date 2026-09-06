@@ -1,6 +1,7 @@
 // CURB-65: Confusion, Urea, Respiratory rate, Blood pressure, возраст ≥65. По 1 баллу, максимум 5.
 
 import { SYSTEMS } from '../../lib/systems.js';
+import { tally } from '../_shared/scoring.js';
 
 /** @type {import('../../lib/types.js').Calculator} */
 export default {
@@ -22,20 +23,13 @@ export default {
   ],
 
   calculate({ confusion, urea, rr, sbp, dbp, age }) {
-    const breakdown = [];
-    let score = 0;
-    const add = (cond, label) => {
-      if (cond) {
-        score += 1;
-        breakdown.push({ label, points: 1 });
-      }
-    };
-    add(confusion, 'Спутанность сознания');
-    add(urea > 7, 'Мочевина > 7 ммоль/л');
-    add(rr >= 30, 'ЧДД ≥ 30/мин');
-    add(sbp < 90 || dbp <= 60, 'САД < 90 или ДАД ≤ 60 мм рт. ст.');
-    add(age >= 65, 'Возраст ≥ 65 лет');
-    return { value: score, decimals: 0, breakdown };
+    return tally([
+      [confusion, 'Спутанность сознания'],
+      [urea > 7, 'Мочевина > 7 ммоль/л'],
+      [rr >= 30, 'ЧДД ≥ 30/мин'],
+      [sbp < 90 || dbp <= 60, 'САД < 90 или ДАД ≤ 60 мм рт. ст.'],
+      [age >= 65, 'Возраст ≥ 65 лет'],
+    ]);
   },
 
   result: {

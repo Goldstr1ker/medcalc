@@ -1,6 +1,7 @@
 // Шкала Уэллса для ТЭЛА (дихотомизированная версия: ≤4 — маловероятна, >4 — вероятна).
 
 import { SYSTEMS } from '../../lib/systems.js';
+import { tally } from '../_shared/scoring.js';
 
 /** @type {import('../../lib/types.js').Calculator} */
 export default {
@@ -23,22 +24,18 @@ export default {
   ],
 
   calculate({ dvtSigns, peMostLikely, hr100, immobilization, priorDvtPe, hemoptysis, malignancy }) {
-    const breakdown = [];
-    let score = 0;
-    const add = (cond, label, pts) => {
-      if (cond) {
-        score += pts;
-        breakdown.push({ label, points: pts });
-      }
-    };
-    add(dvtSigns, 'Клинические признаки ТГВ', 3);
-    add(peMostLikely, 'ТЭЛА — наиболее вероятный диагноз', 3);
-    add(hr100, 'ЧСС > 100/мин', 1.5);
-    add(immobilization, 'Иммобилизация/операция', 1.5);
-    add(priorDvtPe, 'ТГВ/ТЭЛА в анамнезе', 1.5);
-    add(hemoptysis, 'Кровохарканье', 1);
-    add(malignancy, 'Онкозаболевание', 1);
-    return { value: score, decimals: 1, breakdown };
+    return tally(
+      [
+        [dvtSigns, 'Клинические признаки ТГВ', 3],
+        [peMostLikely, 'ТЭЛА — наиболее вероятный диагноз', 3],
+        [hr100, 'ЧСС > 100/мин', 1.5],
+        [immobilization, 'Иммобилизация/операция', 1.5],
+        [priorDvtPe, 'ТГВ/ТЭЛА в анамнезе', 1.5],
+        [hemoptysis, 'Кровохарканье'],
+        [malignancy, 'Онкозаболевание'],
+      ],
+      { decimals: 1 },
+    );
   },
 
   result: {

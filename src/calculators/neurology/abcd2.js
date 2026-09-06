@@ -1,6 +1,7 @@
 // ABCD2 — риск инсульта в первые 2 суток после транзиторной ишемической атаки.
 
 import { SYSTEMS } from '../../lib/systems.js';
+import { tally } from '../_shared/scoring.js';
 
 const CLINICAL = [
   'Другие симптомы или ничего из перечисленного',
@@ -29,20 +30,16 @@ export default {
   ],
 
   calculate({ age, sbp, dbp, clinical, duration, diabetes }) {
-    const breakdown = [];
-    let score = 0;
-    const add = (points, label) => {
-      if (points > 0) {
-        score += points;
-        breakdown.push({ label, points });
-      }
-    };
-    add(age >= 60 ? 1 : 0, 'Возраст ≥ 60 лет');
-    add(sbp >= 140 || dbp >= 90 ? 1 : 0, 'АД ≥ 140/90 мм рт. ст. на момент осмотра');
-    add(CLINICAL.indexOf(clinical), `Клиническая картина: ${clinical}`);
-    add(DURATION.indexOf(duration), `Длительность: ${duration}`);
-    add(diabetes ? 1 : 0, 'Сахарный диабет');
-    return { value: score, decimals: 0, breakdown };
+    // У клиники и длительности «балл» — это индекс выбранного варианта (0–2).
+    const clinicalPts = CLINICAL.indexOf(clinical);
+    const durationPts = DURATION.indexOf(duration);
+    return tally([
+      [age >= 60, 'Возраст ≥ 60 лет'],
+      [sbp >= 140 || dbp >= 90, 'АД ≥ 140/90 мм рт. ст. на момент осмотра'],
+      [clinicalPts > 0, `Клиническая картина: ${clinical}`, clinicalPts],
+      [durationPts > 0, `Длительность: ${duration}`, durationPts],
+      [diabetes, 'Сахарный диабет'],
+    ]);
   },
 
   result: {
