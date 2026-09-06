@@ -211,6 +211,32 @@ h2 {
 
 /* ---------- Навигация ---------- */
 
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.crumbs__link {
+  border: 0;
+  background: none;
+  padding: 4px 0;
+  color: var(--accent);
+  font-size: 14px;
+  text-align: left;
+}
+
+.crumbs__link:hover {
+  text-decoration: underline;
+}
+
+.crumbs__sep {
+  color: var(--text-muted);
+}
+
 .link-back {
   border: 0;
   background: none;

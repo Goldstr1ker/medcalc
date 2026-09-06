@@ -85,5 +85,5 @@ export default {
     'Feld LG, et al. Clinical Practice Guideline: Maintenance Intravenous Fluids in Children. Pediatrics. 2018;142(6):e20183083.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

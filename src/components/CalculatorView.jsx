@@ -10,6 +10,7 @@ import {
 } from '../lib/compute.js';
 import { fmtNumber } from '../lib/format.js';
 import { isFavorite, toggleFavorite, pushRecent } from '../lib/storage.js';
+import Breadcrumbs from './Breadcrumbs.jsx';
 import Result from './Result.jsx';
 
 // Границы в схеме заданы в канонической единице, а пользователю показываем
@@ -49,7 +50,7 @@ function groupInputs(inputs) {
   return blocks;
 }
 
-export default function CalculatorView({ calc, onBack }) {
+export default function CalculatorView({ calc, onHome, onAll, onSystem }) {
   const [values, setValues] = useState(() => initialValues(calc.inputs));
   const [units, setUnits] = useState(() => initialUnits(calc.inputs));
   const [fav, setFav] = useState(() => isFavorite(calc.id));
@@ -120,7 +121,7 @@ export default function CalculatorView({ calc, onBack }) {
 
   return (
     <div className="calc">
-      <button className="link-back" onClick={onBack}>← Все калькуляторы</button>
+      <Breadcrumbs system={calc.system} onHome={onHome} onAll={onAll} onSystem={onSystem} />
 
       <header className="calc__head">
         <div>

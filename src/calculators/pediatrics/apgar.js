@@ -138,5 +138,5 @@ export default {
     'Weiner GM, Zaichkin J, eds. Textbook of Neonatal Resuscitation (NRP), 8th ed. American Academy of Pediatrics, 2021.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

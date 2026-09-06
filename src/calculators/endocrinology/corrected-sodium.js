@@ -112,5 +112,5 @@ export default {
     'Hillier TA, Abbott RD, Barrett EJ. Hyponatremia: evaluating the correction factor for hyperglycemia. Am J Med. 1999;106(4):399–403.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

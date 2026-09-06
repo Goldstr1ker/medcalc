@@ -121,5 +121,5 @@ export default {
     'NICE Guideline NG128: Stroke and transient ischaemic attack in over 16s.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

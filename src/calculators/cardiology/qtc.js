@@ -137,5 +137,5 @@ export default {
     'Vandenberk B, et al. Which QT Correction Formulae to Use for QT Monitoring? J Am Heart Assoc. 2016;5(6):e003264.',
   ],
   updated: '2026-09-04',
-  version: 1,
+  version: '1.0',
 };

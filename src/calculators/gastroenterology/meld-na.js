@@ -130,5 +130,5 @@ export default {
     'Wiesner R, et al. Model for end-stage liver disease (MELD) and allocation of donor livers. Gastroenterology. 2003;124(1):91–96.',
   ],
   updated: '2026-09-04',
-  version: 1,
+  version: '1.0',
 };

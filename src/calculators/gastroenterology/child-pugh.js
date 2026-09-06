@@ -138,5 +138,5 @@ export default {
     'Child CG, Turcotte JG. Surgery and portal hypertension. In: The liver and portal hypertension. 1964.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

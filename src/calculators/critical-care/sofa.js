@@ -308,5 +308,5 @@ export default {
     'Evans L, et al. Surviving Sepsis Campaign: International Guidelines 2021. Crit Care Med. 2021;49(11):e1063–e1143.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

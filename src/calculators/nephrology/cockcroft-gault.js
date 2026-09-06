@@ -109,5 +109,5 @@ export default {
     'Cockcroft DW, Gault MH. Prediction of creatinine clearance from serum creatinine. Nephron. 1976;16(1):31–41.',
   ],
   updated: '2026-09-04',
-  version: 1,
+  version: '1.0',
 };

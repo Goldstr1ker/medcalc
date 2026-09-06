@@ -122,5 +122,5 @@ export default {
     'Payne RB, et al. Interpretation of serum calcium in patients with abnormal serum proteins. Br Med J. 1973;4(5893):643–646.',
   ],
   updated: '2026-09-04',
-  version: 1,
+  version: '1.0',
 };

@@ -258,9 +258,14 @@ for (const { file, calc } of loaded) {
     }
   }
 
-  // --- дата обновления ---
+  // --- дата обновления и версия ---
   if (calc.updated && !/^\d{4}-\d{2}-\d{2}$/.test(calc.updated)) {
     err(file, `updated "${calc.updated}" — ожидается формат ГГГГ-ММ-ДД`);
+  }
+  // Строкой «мажор.минор»: у числа 1.10 неотличимо от 1.1, и десятое
+  // минорное обновление схлопнулось бы с первым.
+  if (calc.version !== undefined && !/^\d+\.\d+$/.test(String(calc.version))) {
+    err(file, `version "${calc.version}" — ожидается строка вида "1.0" (мажор.минор)`);
   }
 }
 

@@ -76,5 +76,5 @@ export default {
     'Wallace TM, Levy JC, Matthews DR. Use and abuse of HOMA modeling. Diabetes Care. 2004;27(6):1487–1495.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

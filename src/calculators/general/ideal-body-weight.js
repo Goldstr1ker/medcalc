@@ -84,5 +84,5 @@ export default {
     'Pai MP, Paloucek FP. The origin of the "ideal" body weight equations. Ann Pharmacother. 2000;34(9):1066–1069.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

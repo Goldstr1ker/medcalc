@@ -124,5 +124,5 @@ export default {
     'Wells PS, et al. Evaluation of D-dimer in the diagnosis of suspected deep-vein thrombosis. N Engl J Med. 2003;349(13):1227–1235.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

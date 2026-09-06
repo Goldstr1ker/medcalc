@@ -93,5 +93,5 @@ export default {
     'ISBI Practice Guidelines for Burn Care. Burns. 2016;42(5):953–1021.',
   ],
   updated: '2026-09-04',
-  version: 1,
+  version: '1.0',
 };

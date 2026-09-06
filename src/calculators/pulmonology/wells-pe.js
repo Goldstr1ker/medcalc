@@ -112,5 +112,5 @@ export default {
     'Konstantinides SV, et al. 2019 ESC Guidelines for the diagnosis and management of acute pulmonary embolism. Eur Heart J. 2020;41(4):543–603.',
   ],
   updated: '2026-09-04',
-  version: 1,
+  version: '1.0',
 };

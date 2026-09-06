@@ -140,5 +140,5 @@ export default {
     'Cuker A, et al. American Society of Hematology 2018 guidelines for management of venous thromboembolism: heparin-induced thrombocytopenia. Blood Adv. 2018;2(22):3360–3392.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

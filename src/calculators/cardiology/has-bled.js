@@ -106,5 +106,5 @@ export default {
     'Hindricks G, et al. 2020 ESC Guidelines for the diagnosis and management of atrial fibrillation. Eur Heart J. 2021;42(5):373–498.',
   ],
   updated: '2026-09-04',
-  version: 1,
+  version: '1.0',
 };

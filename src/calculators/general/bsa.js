@@ -57,5 +57,5 @@ export default {
 
   references: ['Mosteller RD. Simplified calculation of body-surface area. N Engl J Med. 1987;317(17):1098.'],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

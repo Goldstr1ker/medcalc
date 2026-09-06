@@ -3,6 +3,7 @@ import { calculators, getBySystem, getCalculatorMeta, loadCalculator } from './r
 import { acceptDisclaimer, isDisclaimerAccepted } from './lib/storage.js';
 import Home, { CalcList } from './components/Home.jsx';
 import CalculatorView from './components/CalculatorView.jsx';
+import Breadcrumbs from './components/Breadcrumbs.jsx';
 import Disclaimer from './components/Disclaimer.jsx';
 import InstallBanner from './components/InstallBanner.jsx';
 import CalculatorErrorBoundary from './components/CalculatorErrorBoundary.jsx';
@@ -80,7 +81,13 @@ export default function App() {
             калькулятор, поэтому сброс ошибки не нужен отдельным кодом. */}
         {route.name === 'calc' && (
           <CalculatorErrorBoundary key={route.id} id={route.id} onBack={() => go('#/')}>
-            <CalcRoute id={route.id} onBack={() => go('#/')} />
+            <CalcRoute
+              id={route.id}
+              onBack={() => go('#/')}
+              onHome={() => go('#/')}
+              onAll={() => go('#/all')}
+              onSystem={(system) => go(`#/system/${encodeURIComponent(system)}`)}
+            />
           </CalculatorErrorBoundary>
         )}
       </main>
@@ -108,7 +115,7 @@ function SystemView({ system, onOpen, onBack }) {
 // Заголовок и раздел берутся из индекса и рисуются сразу — так переход
 // не выглядит как пустой экран с надписью «Загрузка», даже если чанк
 // действительно нужно скачать.
-function CalcRoute({ id, onBack }) {
+function CalcRoute({ id, onBack, onHome, onAll, onSystem }) {
   const [calc, setCalc] = useState(null);
   const [status, setStatus] = useState('loading');
   const meta = getCalculatorMeta(id);
@@ -138,11 +145,17 @@ function CalcRoute({ id, onBack }) {
     };
   }, [id]);
 
-  if (status === 'ready' && calc) return <CalculatorView calc={calc} onBack={onBack} />;
+  if (status === 'ready' && calc) {
+    return (
+      <CalculatorView calc={calc} onHome={onHome} onAll={onAll} onSystem={onSystem} />
+    );
+  }
 
   return (
     <div className="calc">
-      <button className="link-back" onClick={onBack}>← На главную</button>
+      {/* Раздел известен из индекса ещё до загрузки тела — крошки рисуем сразу,
+          чтобы при медленной сети навигация не пропадала с экрана. */}
+      <Breadcrumbs system={meta?.system} onHome={onHome} onAll={onAll} onSystem={onSystem} />
 
       {meta ? (
         <header className="calc__head">

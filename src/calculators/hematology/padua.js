@@ -122,5 +122,5 @@ export default {
     'Barbar S, et al. A risk assessment model for the identification of hospitalized medical patients at risk for venous thromboembolism: the Padua Prediction Score. J Thromb Haemost. 2010;8(11):2450–2457.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

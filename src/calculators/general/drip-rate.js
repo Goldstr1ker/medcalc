@@ -68,5 +68,5 @@ export default {
     'Kee JL, Hayes ER, McCuistion LE. Pharmacology: A Nursing Process Approach. Elsevier — раздел о расчёте скорости внутривенных инфузий.',
   ],
   updated: '2026-09-06',
-  version: 1,
+  version: '1.0',
 };

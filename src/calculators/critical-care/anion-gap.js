@@ -87,5 +87,5 @@ export default {
     'Emmett M, Narins RG. Clinical use of the anion gap. Medicine (Baltimore). 1977;56(1):38–54.',
   ],
   updated: '2026-09-04',
-  version: 1,
+  version: '1.0',
 };

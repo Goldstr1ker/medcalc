@@ -124,5 +124,5 @@ export default {
     'Teasdale G, et al. The Glasgow Coma Scale at 40 years. Lancet Neurol. 2014;13(8):844–854.',
   ],
   updated: '2026-09-04',
-  version: 1,
+  version: '1.0',
 };
