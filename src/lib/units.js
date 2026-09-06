@@ -51,3 +51,9 @@ export const GLUCOSE_MMOL = [
   { id: 'mmol', label: 'ммоль/л', factor: 1 },
   { id: 'mgdl', label: 'мг/дл', factor: 1 / 18 },
 ];
+
+/** Гемоглобин. calculate() получит г/л (отечественная практика). */
+export const HEMOGLOBIN_GL = [
+  { id: 'gl', label: 'г/л', factor: 1 },
+  { id: 'gdl', label: 'г/дл', factor: 10 },
+];
