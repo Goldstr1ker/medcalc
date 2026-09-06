@@ -1,65 +1,64 @@
-// Генератор лёгкого индекса калькуляторов.
+// Генератор индекса калькуляторов. Пишет ДВА файла:
 //
-// Зачем: приложению для главной, разделов и поиска нужны только метаданные
-// (название, раздел, теги, описание) — это ~250 байт на калькулятор. Тело же
-// (поля, формула, тексты по клинрекам, источники, примеры) весит ~6 КБ и нужно
-// только когда человек реально открыл эту шкалу.
+//   src/catalog.generated.js        — лёгкие метаданные (id, path, name, system).
+//                                     Грузятся сразу: нужны главной, разделам,
+//                                     крошкам и загрузчику тел. ~60 байт на шкалу.
 //
-// Раньше import.meta.glob({ eager: true }) тащил в стартовый бандл всё сразу:
-// 16 шкал ≈ 100 КБ исходников, при 150 будет ~900 КБ — и всё это скачивается
-// и парсится при открытии главной, хотя за сеанс открывают одну-две шкалы.
+//   src/search-index.generated.js   — строки для поиска (primary, secondary).
+//                                     Грузятся лениво, когда открыт экран поиска.
+//                                     ~500 байт на шкалу — это ⅔ прежнего индекса.
 //
-// Индекс генерируется из тех же файлов, поэтому разъехаться с ними не может.
-// Файл в .gitignore и создаётся автоматически перед dev и build.
+// Раньше всё лежало в одном файле, и поисковые строки скачивались и парсились
+// при старте, хотя за сеанс поиском пользуются не всегда. Разделение оставляет
+// в стартовом бандле только то, без чего не нарисовать первый экран.
+//
+// Оба файла в .gitignore и генерируются из тех же файлов калькуляторов
+// (перед dev и build), поэтому разъехаться с исходниками не могут.
 
 import { writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { loadCalculators, REPO_ROOT } from './lib/load-calculators.mjs';
 import { buildSearchFields } from '../src/lib/search.js';
 
-const OUT = join(REPO_ROOT, 'src/catalog.generated.js');
+const CATALOG_OUT = join(REPO_ROOT, 'src/catalog.generated.js');
+const SEARCH_OUT = join(REPO_ROOT, 'src/search-index.generated.js');
 
 const loaded = await loadCalculators();
 
-const entries = loaded
+const rows = loaded
   .map(({ file, calc }) => {
     // Путь в том виде, в каком его вернёт import.meta.glob в registry.js:
     // относительно src/, с ведущим './'.
     const fromSrc = relative(join(REPO_ROOT, 'src'), join(REPO_ROOT, file)).replace(/\\/g, '/');
-
-    // Поля для поиска (с транслитерацией) считаются здесь, один раз на сборку
-    // и независимо для каждого калькулятора — а не на каждое нажатие клавиши
-    // и не пересчётом по всему каталогу разом.
     const { primary, secondary } = buildSearchFields(calc);
 
     return {
-      id: calc.id,
-      path: `./${fromSrc}`,
-      name: calc.name,
-      shortName: calc.shortName ?? null,
-      system: calc.system,
-      description: calc.description,
-      primary,
-      secondary,
+      meta: { id: calc.id, path: `./${fromSrc}`, name: calc.name, system: calc.system },
+      search: { id: calc.id, primary, secondary },
     };
   })
-  .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  .sort((a, b) => a.meta.name.localeCompare(b.meta.name, 'ru'));
 
-const body = `// СГЕНЕРИРОВАНО АВТОМАТИЧЕСКИ — не редактировать вручную.
-// Источник: src/calculators/**/*.js
-// Генератор: scripts/build-index.mjs (запускается перед dev и build)
-//
-// Лёгкий индекс: только то, что нужно главной, разделам и поиску.
-// Тела калькуляторов загружаются отдельными чанками по требованию.
+const AUTOGEN =
+  '// СГЕНЕРИРОВАНО АВТОМАТИЧЕСКИ — не редактировать вручную.\n' +
+  '// Источник: src/calculators/**/*.js · Генератор: scripts/build-index.mjs\n';
 
-export const catalog = ${JSON.stringify(entries, null, 2)};
-`;
+const catalog = rows.map((r) => r.meta);
+const searchIndex = rows.map((r) => r.search);
 
-writeFileSync(OUT, body, 'utf8');
+writeFileSync(
+  CATALOG_OUT,
+  `${AUTOGEN}//\n// Лёгкие метаданные: грузятся сразу (главная, разделы, крошки, загрузка тел).\n\nexport const catalog = ${JSON.stringify(catalog, null, 2)};\n`,
+  'utf8',
+);
+writeFileSync(
+  SEARCH_OUT,
+  `${AUTOGEN}//\n// Строки для поиска: грузятся лениво при открытии экрана поиска.\n\nexport const searchIndex = ${JSON.stringify(searchIndex, null, 2)};\n`,
+  'utf8',
+);
 
-const totalSearchChars = entries.reduce((n, e) => n + e.primary.length + e.secondary.length, 0);
+const kb = (obj) => (Buffer.byteLength(JSON.stringify(obj), 'utf8') / 1024).toFixed(1);
 console.log(
-  `Индекс собран: ${entries.length} калькуляторов, ` +
-    `${(Buffer.byteLength(body, 'utf8') / 1024).toFixed(1)} КБ ` +
-    `(из них поисковых строк ${totalSearchChars} символов)`,
+  `Индекс собран: ${rows.length} калькуляторов · ` +
+    `метаданные ${kb(catalog)} КБ (сразу) + поиск ${kb(searchIndex)} КБ (лениво)`,
 );

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   calculators,
   getCalculatorMeta,
+  isSearchIndexReady,
+  loadSearchIndex,
   prefetchCalculator,
   searchCalculators,
   systems,
@@ -11,7 +13,20 @@ import InstallSection from './InstallSection.jsx';
 
 export default function Home({ onOpen, onOpenSystem, onOpenAll }) {
   const [query, setQuery] = useState('');
-  const results = useMemo(() => searchCalculators(query), [query]);
+
+  // Индекс поиска — отдельный ленивый чанк. Тянем его при первом обращении
+  // к строке поиска (фокус или ввод), а не при старте приложения и не при
+  // каждом заходе на главную. Кто открыл калькулятор по прямой ссылке и
+  // не искал — не платит за этот чанк вовсе.
+  const [searchReady, setSearchReady] = useState(isSearchIndexReady);
+  const activateSearch = () => {
+    if (!isSearchIndexReady()) loadSearchIndex().then(() => setSearchReady(true));
+  };
+
+  const results = useMemo(
+    () => (searchReady ? searchCalculators(query) : []),
+    [query, searchReady],
+  );
 
   // Автофокус поиска — только там, где есть мышь. На телефоне он при каждом
   // заходе на главную поднимает клавиатуру поверх избранного и разделов.
@@ -38,14 +53,24 @@ export default function Home({ onOpen, onOpenSystem, onOpenAll }) {
         type="search"
         placeholder="Поиск: СКФ, инсульт, сепсис…"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onFocus={activateSearch}
+        onChange={(e) => {
+          activateSearch();
+          setQuery(e.target.value);
+        }}
         autoFocus={autoFocusSearch}
       />
 
       {query ? (
         <section>
-          <h2 className="section-title">Найдено: {results.length}</h2>
-          <CalcList items={results} onOpen={onOpen} />
+          {searchReady ? (
+            <>
+              <h2 className="section-title">Найдено: {results.length}</h2>
+              <CalcList items={results} onOpen={onOpen} />
+            </>
+          ) : (
+            <p className="muted">Загрузка поиска…</p>
+          )}
         </section>
       ) : (
         <>

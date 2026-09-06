@@ -1,7 +1,7 @@
 {
   "name": "medcalc",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.5.0",
   "type": "module",
   "description": "Клинические калькуляторы и шкалы с разбором по клиническим рекомендациям. Офлайн, на русском.",
   "scripts": {

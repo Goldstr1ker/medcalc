@@ -1,9 +1,11 @@
-// Реестр калькуляторов.
+// Реестр калькуляторов. Три уровня загрузки:
 //
-// Разделён на две части:
-//   1. catalog — лёгкий индекс метаданных, генерируется скриптом и грузится сразу.
-//      Из него живут главная, разделы и поиск.
-//   2. loaders — тела калькуляторов, каждое отдельным чанком, грузятся по требованию.
+//   1. catalog — метаданные (id, path, name, system), грузятся сразу.
+//      Из них живут главная, разделы, крошки и выбор чанка для загрузки тела.
+//   2. search-index — строки для поиска, грузятся лениво при открытии поиска
+//      (см. loadSearchIndex). Это ⅔ веса прежнего индекса, а поиском
+//      пользуются не в каждом сеансе.
+//   3. loaders — тела калькуляторов, каждый отдельным чанком по требованию.
 //
 // import.meta.glob БЕЗ eager возвращает не модули, а функции-загрузчики, поэтому
 // Vite нарезает каждый калькулятор в свой чанк. Офлайн от этого не страдает:
@@ -49,13 +51,41 @@ export function getBySystem(system) {
   return catalog.filter((c) => c.system === system);
 }
 
+// --- поиск (ленивый индекс) ---
+//
+// Строки для поиска вынесены в отдельный чанк search-index.generated.js.
+// Он подтягивается при монтировании экрана поиска (Home вызывает
+// loadSearchIndex), а не при старте приложения. До загрузки searchCalculators
+// возвращает пустой список, экран показывает «Загрузка поиска…» — на практике
+// чанк берётся из precache мгновенно.
+
+/** @type {Array<{id:string,name:string,system:string,primary:string,secondary:string}> | null} */
+let searchEntries = null;
+let searchPromise = null;
+
+export function loadSearchIndex() {
+  if (!searchPromise) {
+    searchPromise = import('./search-index.generated.js').then((mod) => {
+      searchEntries = mod.searchIndex.map((s) => {
+        const meta = byId.get(s.id);
+        return { id: s.id, name: meta.name, system: meta.system, primary: s.primary, secondary: s.secondary };
+      });
+      return searchEntries;
+    });
+  }
+  return searchPromise;
+}
+
+export function isSearchIndexReady() {
+  return searchEntries !== null;
+}
+
 // Ранжированный поиск: совпадение в названии весит больше, чем в описании/тегах,
 // и запрос латиницей («skf») находит кириллические названия («СКФ») благодаря
-// транслитерации, вшитой в индекс при сборке (см. lib/search.js). Сами поля
-// поиска предвычислены генератором — здесь на каждое нажатие клавиши идёт
-// только сравнение строк, без пересборки текста.
+// транслитерации в рантайме (см. lib/search.js). На каждое нажатие клавиши —
+// только сравнение строк по уже загруженному индексу.
 export function searchCalculators(query) {
-  return rankBySearch(catalog, query);
+  return searchEntries ? rankBySearch(searchEntries, query) : [];
 }
 
 // --- загрузка тел ---

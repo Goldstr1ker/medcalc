@@ -97,17 +97,26 @@ test('rankBySearch: при равном весе порядок алфавитн
 
 // --- проверка на настоящем каталоге ---
 //
-// Импортируем catalog.generated.js и rankBySearch напрямую, а не
-// searchCalculators из registry.js: registry.js использует import.meta.glob
-// для тел калькуляторов — это фича сборки Vite, в чистом Node её нет
-// (так же обходятся другие тесты в этом проекте, см. calculators.test.mjs).
+// Записи собираем тем же рецептом, что и генератор индекса (build-index.mjs)
+// и рантайм (registry.loadSearchIndex): id + name + buildSearchFields(calc).
+// Не импортируем catalog.generated.js — после разделения индекса поисковые
+// поля лежат в отдельном файле, а тест не должен зависеть от его формата.
 // Ловит регрессию, если чей-то новый калькулятор случайно перетянет
 // на себя ранжирование по общему слову вроде «риск» или «оценка».
 
-import { catalog } from '../src/catalog.generated.js';
+import { loadCalculators } from '../scripts/lib/load-calculators.mjs';
+
+const catalogEntries = (await loadCalculators())
+  .map(({ calc }) => ({
+    id: calc.id,
+    name: calc.name,
+    shortName: calc.shortName ?? null,
+    ...buildSearchFields(calc),
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 
 test('поиск по реальному каталогу: латиницей находится калькулятор СКФ', () => {
-  const results = rankBySearch(catalog, 'skf');
+  const results = rankBySearch(catalogEntries, 'skf');
   assert.ok(
     results.some((c) => c.id === 'ckd-epi-2021'),
     'запрос "skf" должен найти СКФ по CKD-EPI через транслитерацию',
@@ -115,8 +124,8 @@ test('поиск по реальному каталогу: латиницей н
 });
 
 test('поиск по реальному каталогу: точное название — всегда на первом месте', () => {
-  for (const calc of catalog) {
-    const results = rankBySearch(catalog, calc.shortName ?? calc.name);
+  for (const calc of catalogEntries) {
+    const results = rankBySearch(catalogEntries, calc.shortName ?? calc.name);
     assert.equal(
       results[0]?.id,
       calc.id,
