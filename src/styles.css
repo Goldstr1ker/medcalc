@@ -391,6 +391,27 @@ h2 {
   margin: 8px 0 16px;
 }
 
+.field--invalid input {
+  border-color: #dc2626;
+}
+
+.field--invalid input:focus {
+  outline-color: #dc2626;
+}
+
+.field__error {
+  margin-top: 5px;
+  font-size: 12.5px;
+  color: #dc2626;
+}
+
+.result--invalid {
+  color: #dc2626;
+  text-align: center;
+  padding: 22px 20px;
+  border-color: #dc2626;
+}
+
 .result--empty,
 .result--error {
   color: var(--text-muted);

@@ -14,7 +14,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { loadCalculators } from '../scripts/lib/load-calculators.mjs';
-import { initialUnits, initialValues, isReady, resolveText, toCanonical } from '../src/lib/compute.js';
+import {
+  initialUnits,
+  initialValues,
+  resolveText,
+  toCanonical,
+  validateValues,
+} from '../src/lib/compute.js';
 import { resolveBand, resolveBands } from '../src/lib/bands.js';
 import { round } from '../src/lib/format.js';
 
@@ -31,9 +37,13 @@ for (const { file, calc } of loaded) {
         const values = { ...initialValues(calc.inputs), ...ex.inputs };
         const units = { ...initialUnits(calc.inputs), ...(ex.units ?? {}) };
 
+        // Единицы обязательны: границы min/max заданы в канонической единице,
+        // а значения примера — в выбранной. Без units проверка сравнивала бы
+        // «180 мкмоль/л» с потолком «25 мг/дл».
+        const проверка = validateValues(calc.inputs, values, units);
         assert.ok(
-          isReady(calc.inputs, values),
-          'пример не заполняет все обязательные числовые поля',
+          проверка.ready,
+          `пример не проходит проверку ввода: ${JSON.stringify(проверка.issues)}`,
         );
 
         const canonical = toCanonical(calc.inputs, values, units);

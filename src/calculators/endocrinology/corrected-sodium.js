@@ -17,7 +17,7 @@ export default {
 
   inputs: [
     { id: 'sodium', label: 'Натрий сыворотки (измеренный)', type: 'number', unit: 'ммоль/л', min: 100, max: 170 },
-    { id: 'glucose', label: 'Глюкоза сыворотки', type: 'number', min: 0, max: 80, units: GLUCOSE_MMOL },
+    { id: 'glucose', label: 'Глюкоза сыворотки', type: 'number', min: 0.3, max: 80, units: GLUCOSE_MMOL },
   ],
 
   calculate({ sodium, glucose }) {

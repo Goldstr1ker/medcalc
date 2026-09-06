@@ -17,8 +17,8 @@ export default {
     'Оценка тяжести цирроза печени и краткосрочного прогноза по пяти клинико-лабораторным параметрам.',
 
   inputs: [
-    { id: 'bilirubin', label: 'Общий билирубин', type: 'number', min: 0, units: BILIRUBIN_UMOL },
-    { id: 'albumin', label: 'Альбумин сыворотки', type: 'number', min: 0, units: ALBUMIN_GL },
+    { id: 'bilirubin', label: 'Общий билирубин', type: 'number', min: 1, max: 1000, units: BILIRUBIN_UMOL },
+    { id: 'albumin', label: 'Альбумин сыворотки', type: 'number', min: 5, max: 70, units: ALBUMIN_GL },
     { id: 'inr', label: 'МНО', type: 'number', min: 0.5, max: 10 },
     { id: 'ascites', label: 'Асцит', type: 'select', options: ASCITES },
     { id: 'encephalopathy', label: 'Печёночная энцефалопатия', type: 'select', options: ENCEPHALOPATHY },

@@ -21,7 +21,7 @@ export default {
     { id: 'sex', label: 'Пол', type: 'select', options: ['Мужской', 'Женский'] },
     { id: 'age', label: 'Возраст', type: 'number', unit: 'лет', min: 18, max: 120 },
     { id: 'weight', label: 'Масса тела', type: 'number', unit: 'кг', min: 20, max: 300 },
-    { id: 'scr', label: 'Креатинин сыворотки', type: 'number', min: 0, units: CREATININE_MGDL },
+    { id: 'scr', label: 'Креатинин сыворотки', type: 'number', min: 0.05, max: 25, units: CREATININE_MGDL },
   ],
 
   calculate({ sex, age, weight, scr }) {

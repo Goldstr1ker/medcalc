@@ -38,6 +38,11 @@ export function resolveBands(spec, inputs) {
 // на каждый рендер калькулятора, а диапазонов всего несколько — сортировать
 // их заново каждый раз было чистой тратой.
 export function resolveBand(value, bands) {
+  // NaN и Infinity не «ниже шкалы», а отсутствие результата: без этой проверки
+  // сравнение NaN >= min всегда ложно, и значение молча уезжало в нижний
+  // диапазон (у СКФ — в «терминальную ХБП»).
+  if (!Number.isFinite(value)) return null;
+
   /** @type {import('./types.js').Band | null} */
   let match = null;
   /** @type {import('./types.js').Band | null} */

@@ -20,9 +20,10 @@ export default {
       label: 'Общий кальций сыворотки',
       type: 'number',
       unit: 'ммоль/л',
-      min: 0,
+      min: 0.5,
+      max: 6,
     },
-    { id: 'albumin', label: 'Альбумин сыворотки', type: 'number', min: 0, units: ALBUMIN_GL },
+    { id: 'albumin', label: 'Альбумин сыворотки', type: 'number', min: 5, max: 70, units: ALBUMIN_GL },
   ],
 
   calculate({ calcium, albumin }) {

@@ -15,7 +15,7 @@ export default {
 
   inputs: [
     { id: 'insulin', label: 'Инсулин натощак', type: 'number', unit: 'мкЕд/мл', min: 0, max: 300 },
-    { id: 'glucose', label: 'Глюкоза натощак', type: 'number', min: 0, max: 40, units: GLUCOSE_MMOL },
+    { id: 'glucose', label: 'Глюкоза натощак', type: 'number', min: 0.3, max: 40, units: GLUCOSE_MMOL },
   ],
 
   calculate({ insulin, glucose }) {

@@ -19,8 +19,8 @@ export default {
     'Индекс тяжести терминального заболевания печени с поправкой на натрий — используется для приоритизации в листе ожидания трансплантации.',
 
   inputs: [
-    { id: 'bilirubin', label: 'Общий билирубин', type: 'number', min: 0, units: BILIRUBIN_MGDL },
-    { id: 'creatinine', label: 'Креатинин сыворотки', type: 'number', min: 0, units: CREATININE_MGDL },
+    { id: 'bilirubin', label: 'Общий билирубин', type: 'number', min: 0.05, max: 60, units: BILIRUBIN_MGDL },
+    { id: 'creatinine', label: 'Креатинин сыворотки', type: 'number', min: 0.05, max: 25, units: CREATININE_MGDL },
     { id: 'inr', label: 'МНО', type: 'number', min: 0.5, max: 10 },
     { id: 'sodium', label: 'Натрий сыворотки', type: 'number', unit: 'ммоль/л', min: 100, max: 160 },
     { id: 'dialysis', label: 'Гемодиализ ≥ 2 раз за последнюю неделю (или ЗПТ ≥ 24 ч)', type: 'boolean' },
