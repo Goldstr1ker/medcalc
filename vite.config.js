@@ -11,8 +11,14 @@ export default defineConfig({
   plugins: [
     preact(),
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      // 'prompt', а не 'autoUpdate': раньше новый service worker молча
+      // активировался при следующей навигации, и пользователь неделями сидел
+      // на старой сборке, ничего об этом не зная. Теперь новая версия ждёт,
+      // а приложение показывает плашку «Обновить» (см. src/lib/sw-update.js).
+      registerType: 'prompt',
+      // Регистрируем сами из main.jsx через virtual:pwa-register — чтобы
+      // подключить колбэки onNeedRefresh / периодическую проверку.
+      injectRegister: false,
 
       // Иконки генерируются из public/logo.svg на этапе сборки и
       // подставляются в <head> автоматически (в т.ч. apple-touch-icon).

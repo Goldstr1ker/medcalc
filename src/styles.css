@@ -709,6 +709,42 @@ h2 {
   font-size: 15px;
 }
 
+/* ---------- Плашка обновления ---------- */
+
+/* Sticky, а не fixed: появляется редко и осознанно, пусть спокойно сдвинет
+   содержимое вниз, а не перекроет шапку. */
+.update-banner {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.update-banner__text {
+  flex: 1;
+}
+
+.update-banner__btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.update-banner__btn:disabled {
+  opacity: 0.6;
+}
+
 /* ---------- Установка приложения ---------- */
 
 /* Всплывающий баннер (только телефон, после 2 калькуляторов) */

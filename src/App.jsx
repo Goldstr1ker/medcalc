@@ -6,6 +6,7 @@ import CalculatorView from './components/CalculatorView.jsx';
 import Breadcrumbs from './components/Breadcrumbs.jsx';
 import Disclaimer from './components/Disclaimer.jsx';
 import InstallBanner from './components/InstallBanner.jsx';
+import UpdateBanner from './components/UpdateBanner.jsx';
 import CalculatorErrorBoundary from './components/CalculatorErrorBoundary.jsx';
 
 // Простейший роутер на hash: #/  #/system/<раздел>  #/calc/<id>
@@ -40,17 +41,21 @@ export default function App() {
 
   if (!accepted) {
     return (
-      <Disclaimer
-        onAccept={() => {
-          acceptDisclaimer();
-          setAccepted(true);
-        }}
-      />
+      <>
+        <UpdateBanner />
+        <Disclaimer
+          onAccept={() => {
+            acceptDisclaimer();
+            setAccepted(true);
+          }}
+        />
+      </>
     );
   }
 
   return (
     <>
+      <UpdateBanner />
       <main className="app">
         {route.name === 'home' && (
           <Home
